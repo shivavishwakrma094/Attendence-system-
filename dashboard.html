@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <!-- Session Security Guard -->
+  <script>
+    if (localStorage.getItem('vigilance_logged_in') !== 'true') {
+      window.location.replace('login.html');
+    }
+  </script>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Vigilance AI - Dashboard Overview</title>
+  <meta name="description" content="Vigilance AI biometric monitoring and real-time attendance dashboard, powered by BuildHub.">
+  
+  <!-- Typography & Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Custom Tailwind Theme Definition -->
+  <script id="tailwind-config">
+    try {
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "#131315",
+              primary: "#ffd165",
+              "primary-container": "#ffdf9a",
+              "on-primary": "#1b1b1e",
+              "on-surface": "#e5e1e4",
+              "on-surface-variant": "#d3c5ac",
+              outline: "#9b8f79",
+              error: "#ffb4ab",
+              "surface-container-lowest": "#0e0e10",
+              "surface-container-low": "#1c1b1d",
+              "surface-container": "#201f22",
+              "surface-container-high": "#2a2a2c",
+              "surface-container-highest": "#353437",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              label: ["'Hanken Grotesk'", "sans-serif"],
+            }
+          },
+        },
+      }
+    } catch (_e) {}
+  </script>
+
+  <!-- Custom Styles for Effects & Animations -->
+  <style>
+    /* Subtle Grid Overlay */
+    .grid-overlay {
+      background-image: 
+        linear-gradient(rgba(255, 209, 101, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 209, 101, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: center;
+    }
+    
+    /* Yellow Gradient Glows */
+    .yellow-gradient {
+      background: 
+        radial-gradient(circle at 80% 20%, rgba(255, 209, 101, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 10% 80%, rgba(255, 209, 101, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 209, 101, 0.02) 0%, transparent 70%);
+    }
+
+    /* Glassmorphism Panels */
+    .glass-panel {
+      background: rgba(20, 20, 22, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    /* Glowing Yellow Border/Shadow Effect */
+    .glow-yellow {
+      box-shadow: 0 0 45px -10px rgba(255, 209, 101, 0.15);
+      border: 1px solid rgba(255, 209, 101, 0.15);
+    }
+
+    /* Hide default scrollbars */
+    .scroll-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scroll-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    /* Pulsing badge animation */
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; box-shadow: 0 0 8px rgba(255, 209, 101, 0.4); }
+      50% { opacity: 1; box-shadow: 0 0 18px rgba(255, 209, 101, 0.8); }
+    }
+    .pulse-badge {
+      animation: pulse-glow 2.5s infinite;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-sans overflow-hidden h-screen flex flex-col relative select-none">
+
+  <!-- Grid & Ambient Glow Overlays -->
+  <div class="fixed inset-0 grid-overlay pointer-events-none z-0"></div>
+  <div class="fixed inset-0 yellow-gradient pointer-events-none z-0"></div>
+
+  <!-- Sticky backdrop-blurred top header -->
+  <header class="bg-surface-container-lowest/40 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5 w-full">
+    <div class="flex justify-between items-center px-6 py-4 w-full">
+      
+      <!-- Brand Logotype (Clickable) -->
+      <a href="dashboard.html" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+          <span class="material-symbols-outlined text-on-primary text-xl font-bold" style="font-variation-settings: 'FILL' 1;">shield</span>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight text-on-surface flex items-center gap-1 font-label">
+          Vigilance <span class="text-primary font-black uppercase text-sm tracking-wider font-sans">AI</span>
+        </h1>
+      </a>
+
+      <!-- Navigation links -->
+      <nav class="hidden md:flex items-center gap-8 font-label">
+        <a class="text-primary font-extrabold border-b-2 border-primary pb-1 text-xs tracking-wider uppercase" href="dashboard.html" id="nav-dashboard">Dashboard</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="livefeed.html" id="nav-livefeed">Live Feed</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="analytics.html" id="nav-analytics">Analytics</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="settings.html" id="nav-settings">Settings</a>
+      </nav>
+
+      <!-- User controls -->
+      <div class="flex items-center gap-4 pl-6 border-l border-white/10 font-label relative">
+        <div class="text-right hidden sm:block">
+          <p id="header-user-name" class="text-xs font-black text-on-surface">Admin User</p>
+          <p id="header-user-role" class="text-[9px] text-primary/70 font-bold uppercase tracking-widest">System Admin</p>
+        </div>
+        <div onclick="toggleProfileDropdown()" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center border border-white/10 cursor-pointer hover:border-primary/45 transition-colors">
+          <span class="material-symbols-outlined text-primary text-lg">person</span>
+        </div>
+        
+        <!-- Profile Dropdown Menu -->
+        <div id="profile-dropdown" class="absolute right-0 top-12 w-56 glass-panel border border-white/10 rounded-2xl p-4 shadow-xl z-50 flex flex-col gap-3 font-label hidden">
+          <div class="border-b border-white/5 pb-2">
+            <p id="dropdown-user-name" class="text-xs font-black text-on-surface">Admin User</p>
+            <p id="dropdown-user-email" class="text-[9px] text-outline mt-0.5">admin@vigilance.ai</p>
+            <p id="dropdown-user-role" class="text-[8px] text-primary font-black uppercase tracking-wider mt-1">System Admin</p>
+          </div>
+          <button type="button" onclick="handleLogout()" class="w-full py-2 bg-error/10 hover:bg-error/20 text-error border border-error/20 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
+            <span class="material-symbols-outlined text-sm">logout</span>
+            Sign Out Session
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Core Page Body (Main Area) -->
+  <div class="flex flex-1 overflow-hidden relative z-10 w-full">
+    
+    <!-- Left Sidebar: Vigilance System -->
+    <aside class="hidden md:flex flex-col h-full w-60 bg-surface-container-lowest/30 backdrop-blur-2xl border-r border-white/5 font-label">
+      <div class="flex flex-col h-full justify-between py-6">
+        
+        <div class="space-y-8">
+          <!-- Top Info Badge -->
+          <div class="px-6 flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-xl">analytics</span>
+            </div>
+            <div>
+              <h2 class="font-extrabold text-on-surface uppercase tracking-widest text-[9px]">Vigilance System</h2>
+              <p class="text-[10px] text-primary font-black uppercase tracking-wider">Online • Monitoring</p>
+            </div>
+          </div>
+
+          <!-- Nav Menu -->
+          <nav class="space-y-1.5 px-3">
+            <a href="dashboard.html" class="bg-primary text-on-primary flex items-center gap-3.5 px-4 py-3 rounded-xl border border-primary/15 transition-all text-xs font-black uppercase tracking-wider shadow-lg shadow-primary/5">
+              <span class="material-symbols-outlined text-lg">dashboard</span>
+              <span>Dashboard Overview</span>
+            </a>
+
+            <a href="registration.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg" data-original-icon="person_add">person_add</span>
+              <span>Registration</span>
+            </a>
+            
+            <a href="livefeed.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;" data-original-icon="center_focus_strong">center_focus_strong</span>
+              <span>Live Feed</span>
+            </a>
+
+            <a href="analytics.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">analytics</span>
+              <span>Analytics Insights</span>
+            </a>
+
+            <a href="export.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">description</span>
+              <span>Export Telemetry</span>
+            </a>
+            
+            <a href="settings.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">settings</span>
+              <span>System Settings</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Sidebar footer / System stats -->
+        <div class="px-6 space-y-5">
+          <div class="bg-surface-container-high/40 p-4 rounded-2xl border border-white/5 backdrop-blur-md">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[9px] uppercase font-bold text-outline tracking-wider">Neural Load</span>
+              <span class="text-[9px] text-primary font-black uppercase tracking-wider">Optimal</span>
+            </div>
+            <div class="h-1.5 bg-surface-container-lowest rounded-full overflow-hidden">
+              <div class="h-full bg-primary w-[42%] shadow-[0_0_8px_rgba(255,209,101,0.4)]"></div>
+            </div>
+          </div>
+          <p class="text-[9px] text-outline font-black tracking-widest text-center opacity-40 uppercase">
+            v2.4.0 BuildHub Engine
+          </p>
+        </div>
+        
+      </div>
+    </aside>
+
+    <!-- Main View: Dashboard Canvas -->
+    <main class="flex-1 flex flex-col p-6 overflow-hidden relative">
+      <div class="flex flex-col gap-6 h-full overflow-y-auto scroll-hide">
+        
+        <!-- Welcome banner -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-on-surface tracking-tight font-sans">System Overview Dashboard</h2>
+            <p class="text-xs text-outline font-label mt-1">Real-time attendance telemetry and biometric analytics suite.</p>
+          </div>
+          <div class="flex items-center gap-2.5 font-label">
+            <span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(255,209,101,0.8)]"></span>
+            <span class="text-[10px] text-primary font-black uppercase tracking-wider">Telemetry Core Synchronized</span>
+          </div>
+        </div>
+
+        <!-- Stats Grid (4 Columns) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          
+          <!-- Card 1: Total Enrolled -->
+          <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center justify-between hover:border-primary/20 transition-all cursor-pointer group">
+            <div>
+              <p class="text-[9px] font-black uppercase text-outline tracking-wider font-label">Total Enrollment</p>
+              <h3 class="text-2xl font-black text-on-surface tracking-tight mt-1 font-sans">156</h3>
+              <p class="text-[9px] text-primary font-bold uppercase tracking-wider font-label mt-1">+12 Enrolled This Week</p>
+            </div>
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/10 group-hover:bg-primary/20 transition-all">
+              <span class="material-symbols-outlined text-primary text-2xl">school</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Camera Status -->
+          <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center justify-between hover:border-primary/20 transition-all cursor-pointer group">
+            <div>
+              <p class="text-[9px] font-black uppercase text-outline tracking-wider font-label">Active Surveillance</p>
+              <h3 class="text-2xl font-black text-on-surface tracking-tight mt-1 font-sans">8 / 8</h3>
+              <p class="text-[9px] text-primary font-bold uppercase tracking-wider font-label mt-1">All Feeds Online</p>
+            </div>
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/10 group-hover:bg-primary/20 transition-all">
+              <span class="material-symbols-outlined text-primary text-2xl">videocam</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Attendance Ratio -->
+          <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center justify-between hover:border-primary/20 transition-all cursor-pointer group">
+            <div>
+              <p class="text-[9px] font-black uppercase text-outline tracking-wider font-label">Today's Attendance</p>
+              <h3 class="text-2xl font-black text-on-surface tracking-tight mt-1 font-sans">96.2%</h3>
+              <p class="text-[9px] text-primary font-bold uppercase tracking-wider font-label mt-1">150 present today</p>
+            </div>
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/10 group-hover:bg-primary/20 transition-all">
+              <span class="material-symbols-outlined text-primary text-2xl">trending_up</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Accuracy -->
+          <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center justify-between hover:border-primary/20 transition-all cursor-pointer group">
+            <div>
+              <p class="text-[9px] font-black uppercase text-outline tracking-wider font-label">Accuracy Margin</p>
+              <h3 id="accuracy-margin-display" class="text-2xl font-black text-on-surface tracking-tight mt-1 font-sans">98.4%</h3>
+              <p class="text-[9px] text-primary font-bold uppercase tracking-wider font-label mt-1">Confidence Rating</p>
+            </div>
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/10 group-hover:bg-primary/20 transition-all">
+              <span class="material-symbols-outlined text-primary text-2xl">fingerprint</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Main Dashboard Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Camera Feed Status Details (Columns 1-2) -->
+          <div class="lg:col-span-2 glass-panel rounded-2xl p-6 border border-white/5 flex flex-col gap-5">
+            <div class="flex items-center justify-between border-b border-white/5 pb-4">
+              <div>
+                <h3 class="text-sm font-bold text-on-surface font-sans">Surveillance Node Telemetry</h3>
+                <p class="text-[10px] text-outline font-label mt-0.5">Physical linked camera status and verification log load.</p>
+              </div>
+              <button id="btn-reset-nodes" class="bg-primary/10 border border-primary/20 text-primary px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider font-label hover:bg-primary/20 transition-all">
+                Reset System Nodes
+              </button>
+            </div>
+
+            <!-- Nodes Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <!-- Gate 1 Node -->
+              <div class="surveillance-node bg-surface-container-high/30 p-4 rounded-xl border border-white/5 flex items-center justify-between group hover:border-primary/25 transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/15 icon-container">
+                    <span class="material-symbols-outlined text-primary text-base">nest_cam_outdoor</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-on-surface font-sans">Gate 1 Cam</h4>
+                    <p class="text-[9px] text-outline font-label mt-0.5 count-text">1,245 matches today</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 font-label load-status">
+                  <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                  <span class="text-[8px] text-primary font-black uppercase">98% Load</span>
+                </div>
+              </div>
+
+              <!-- Main Hallway -->
+              <div class="surveillance-node bg-surface-container-high/30 p-4 rounded-xl border border-white/5 flex items-center justify-between group hover:border-primary/25 transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/15 icon-container">
+                    <span class="material-symbols-outlined text-primary text-base">nest_cam_indoor</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-on-surface font-sans">Main Hallway</h4>
+                    <p class="text-[9px] text-outline font-label mt-0.5 count-text">940 matches today</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 font-label load-status">
+                  <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                  <span class="text-[8px] text-primary font-black uppercase">94% Load</span>
+                </div>
+              </div>
+
+              <!-- Lab A -->
+              <div class="surveillance-node bg-surface-container-high/30 p-4 rounded-xl border border-white/5 flex items-center justify-between group hover:border-primary/25 transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/15 icon-container">
+                    <span class="material-symbols-outlined text-primary text-base">videocam</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-on-surface font-sans">Lab A Terminal</h4>
+                    <p class="text-[9px] text-outline font-label mt-0.5 count-text">420 matches today</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 font-label load-status">
+                  <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                  <span class="text-[8px] text-primary font-black uppercase">97% Load</span>
+                </div>
+              </div>
+
+              <!-- Class 101 -->
+              <div class="surveillance-node bg-surface-container-high/30 p-4 rounded-xl border border-white/5 flex items-center justify-between group hover:border-primary/25 transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/15 icon-container">
+                    <span class="material-symbols-outlined text-primary text-base">videocam</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-on-surface font-sans">Class 101 Cam</h4>
+                    <p class="text-[9px] text-outline font-label mt-0.5 count-text">812 matches today</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 font-label load-status">
+                  <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                  <span class="text-[8px] text-primary font-black uppercase">95% Load</span>
+                </div>
+              </div>
+
+              <!-- Library -->
+              <div class="surveillance-node bg-surface-container-high/30 p-4 rounded-xl border border-white/5 flex items-center justify-between group hover:border-primary/25 transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/15 icon-container">
+                    <span class="material-symbols-outlined text-primary text-base">nest_cam_indoor</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-on-surface font-sans">Library Entrance</h4>
+                    <p class="text-[9px] text-outline font-label mt-0.5 count-text">311 matches today</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 font-label load-status">
+                  <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                  <span class="text-[8px] text-primary font-black uppercase">99% Load</span>
+                </div>
+              </div>
+
+              <!-- Parking Gate -->
+              <div class="surveillance-node bg-surface-container-high/30 p-4 rounded-xl border border-white/5 flex items-center justify-between group hover:border-primary/25 transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/15 icon-container">
+                    <span class="material-symbols-outlined text-primary text-base">nest_cam_outdoor</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-on-surface font-sans">Parking Entrance</h4>
+                    <p class="text-[9px] text-outline font-label mt-0.5 count-text">244 matches today</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 font-label load-status">
+                  <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                  <span class="text-[8px] text-primary font-black uppercase">96% Load</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Incidents & Alerts Column (Column 3) -->
+          <div class="glass-panel rounded-2xl p-6 border border-white/5 flex flex-col gap-4">
+            <div class="flex items-center justify-between border-b border-white/5 pb-4">
+              <div>
+                <h3 class="text-sm font-bold text-on-surface font-sans">System Alerts & Logs</h3>
+                <p class="text-[10px] text-outline font-label mt-0.5">Live security event triggers.</p>
+              </div>
+              <span class="bg-primary/10 text-primary text-[8px] px-2 py-0.5 rounded border border-primary/20 font-black uppercase tracking-wider font-label animate-pulse">Active</span>
+            </div>
+
+            <!-- Alerts List -->
+            <div class="flex-1 overflow-y-auto scroll-hide space-y-3 font-label">
+              
+              <div class="flex gap-3 p-3 rounded-lg bg-white/5 border border-white/5">
+                <span class="material-symbols-outlined text-primary text-lg mt-0.5">info</span>
+                <div>
+                  <p class="text-[10px] font-bold text-on-surface">Neural Model Engine initialized</p>
+                  <p class="text-[8px] text-outline mt-0.5">08:30:15 • BuildHub v3.2 Model active</p>
+                </div>
+              </div>
+
+              <div class="flex gap-3 p-3 rounded-lg bg-white/5 border border-white/5">
+                <span class="material-symbols-outlined text-primary text-lg mt-0.5">done</span>
+                <div>
+                  <p class="text-[10px] font-bold text-on-surface">Daily attendance baseline set</p>
+                  <p class="text-[8px] text-outline mt-0.5">08:00:00 • 156 enrolled students verified</p>
+                </div>
+              </div>
+
+              <div class="flex gap-3 p-3 rounded-lg bg-white/5 border border-white/5">
+                <span class="material-symbols-outlined text-primary text-lg mt-0.5">cloud_sync</span>
+                <div>
+                  <p class="text-[10px] font-bold text-on-surface">Cloud Directory Synced</p>
+                  <p class="text-[8px] text-outline mt-0.5">07:45:00 • Attendance rosters updated</p>
+                </div>
+              </div>
+
+              <div class="flex gap-3 p-3 rounded-lg bg-white/5 border border-white/5">
+                <span class="material-symbols-outlined text-primary text-lg mt-0.5">security</span>
+                <div>
+                  <p class="text-[10px] font-bold text-on-surface">Encryption links verified</p>
+                  <p class="text-[8px] text-outline mt-0.5">07:00:00 • Secure cameras linked successfully</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="bg-surface-container-lowest/60 backdrop-blur-xl w-full border-t border-white/5 relative z-50 font-label">
+    <div class="flex flex-col md:flex-row justify-between items-center px-6 py-4 gap-3 w-full">
+      <div class="flex items-center gap-2">
+        <span class="text-[9px] font-extrabold text-outline uppercase tracking-wider">
+          © 2024 Vigilance AI Ecosystem. BuildHub Powered.
+        </span>
+      </div>
+      <div class="flex gap-6 items-center">
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors uppercase tracking-wider" href="#">Docs</a>
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors uppercase tracking-wider" href="#">Privacy</a>
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors flex items-center gap-2 uppercase tracking-wider" href="#">
+          <span id="footer-status-dot" class="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)]"></span>
+          Status: <span id="footer-status-text">Operational</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Reset Node Telemetry Simulation
+    const resetBtn = document.getElementById('btn-reset-nodes');
+    const nodes = document.querySelectorAll('.surveillance-node');
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        // Disable button visually
+        resetBtn.disabled = true;
+        resetBtn.classList.add('opacity-50', 'pointer-events-none');
+        const originalText = resetBtn.textContent;
+        resetBtn.textContent = "Resetting Node Telemetry...";
+
+        nodes.forEach(node => {
+          const loadStatus = node.querySelector('.load-status');
+          const originalLoadHtml = loadStatus.innerHTML;
+          
+          // Show resetting status
+          loadStatus.innerHTML = `
+            <span class="w-1.5 h-1.5 bg-outline rounded-full animate-ping"></span>
+            <span class="text-[8px] text-outline font-black uppercase">Offline</span>
+          `;
+          node.classList.add('opacity-60');
+
+          const icon = node.querySelector('.icon-container span');
+          if (icon) icon.classList.add('animate-bounce');
+
+          setTimeout(() => {
+            // Restore and assign new random load values
+            const randomLoad = Math.floor(Math.random() * 10) + 90; // 90% to 99%
+            loadStatus.innerHTML = `
+              <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+              <span class="text-[8px] text-primary font-black uppercase">${randomLoad}% Load</span>
+            `;
+            node.classList.remove('opacity-60');
+            if (icon) icon.classList.remove('animate-bounce');
+          }, 1200);
+        });
+
+        // Re-enable button
+        setTimeout(() => {
+          resetBtn.disabled = false;
+          resetBtn.classList.remove('opacity-50', 'pointer-events-none');
+          resetBtn.textContent = originalText;
+        }, 1300);
+      });
+    }
+
+    // Live Telemetry Increment ticks
+    setInterval(() => {
+      if (nodes.length > 0) {
+        const randomNodeIndex = Math.floor(Math.random() * nodes.length);
+        const node = nodes[randomNodeIndex];
+        const countTextElement = node.querySelector('.count-text');
+        if (countTextElement) {
+          const text = countTextElement.textContent;
+          // Extract digits
+          const currentCount = parseInt(text.replace(/,/g, ''), 10);
+          if (!isNaN(currentCount)) {
+            const nextCount = currentCount + 1;
+            countTextElement.textContent = `${nextCount.toLocaleString()} matches today`;
+            
+            // Visual feedback: brief color flash
+            countTextElement.classList.add('text-primary');
+            setTimeout(() => {
+              countTextElement.classList.remove('text-primary');
+            }, 800);
+          }
+        }
+      }
+    }, 4500);
+
+    // Global tactile micro-interactions on button touch
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('mousedown', () => {
+        btn.classList.add('scale-[0.97]');
+      });
+      btn.addEventListener('mouseup', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+    });
+    // Load and Apply LocalStorage configuration settings
+    function loadConfigSettings() {
+      // 1. Footer Status Check
+      const status = localStorage.getItem('vigilance_system_status') || 'Operational';
+      const textEl = document.getElementById('footer-status-text');
+      const dotEl = document.getElementById('footer-status-dot');
+      if (textEl && dotEl) {
+        textEl.textContent = status;
+        if (status === 'Operational') {
+          dotEl.className = "w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)]";
+        } else if (status === 'Maintenance Mode') {
+          dotEl.className = "w-1.5 h-1.5 bg-outline rounded-full shadow-[0_0_6px_rgba(155,143,121,0.8)]";
+        } else if (status === 'Shielded Lockdown') {
+          dotEl.className = "w-1.5 h-1.5 bg-error rounded-full shadow-[0_0_6px_rgba(255,180,171,0.8)] animate-pulse";
+        } else if (status === 'Simulation Active') {
+          dotEl.className = "w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)] animate-ping";
+        }
+      }
+
+      // 2. Accuracy Threshold Check
+      const threshold = localStorage.getItem('vigilance_confidence_threshold') || '98.4';
+      const accuracyDisplay = document.getElementById('accuracy-margin-display');
+      if (accuracyDisplay) {
+        accuracyDisplay.textContent = `${parseFloat(threshold).toFixed(1)}%`;
+      }
+
+      // 3. Sync Active Cameras
+      const activeNodes = JSON.parse(localStorage.getItem('vigilance_active_nodes')) || [
+        'Gate 1 Cam', 'Main Hallway', 'Lab A Terminal', 'Class 101 Cam', 'Library Entrance', 'Parking Entrance'
+      ];
+      document.querySelectorAll('.surveillance-node').forEach(node => {
+        const nameEl = node.querySelector('h4');
+        const name = nameEl ? nameEl.textContent.trim() : '';
+        const loadStatus = node.querySelector('.load-status');
+        if (loadStatus) {
+          if (!activeNodes.includes(name)) {
+            loadStatus.innerHTML = `
+              <span class="w-1.5 h-1.5 bg-outline rounded-full"></span>
+              <span class="text-[8px] text-outline font-black uppercase">Offline</span>
+            `;
+            node.classList.add('opacity-40');
+            node.classList.add('pointer-events-none');
+          } else {
+            node.classList.remove('opacity-40');
+            node.classList.remove('pointer-events-none');
+          }
+        }
+      });
+    }
+
+    // Call config loader on load
+    window.addEventListener('load', () => {
+      loadConfigSettings();
+      loadUserDetails();
+    });
+
+    // Toggle Profile Dropdown
+    function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profile-dropdown');
+      if (dropdown) dropdown.classList.toggle('hidden');
+    }
+
+    // Close dropdown on click outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('profile-dropdown');
+      const avatarBtn = dropdown ? dropdown.previousElementSibling : null;
+      if (dropdown && avatarBtn && !dropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // Handle logout action
+    function handleLogout() {
+      localStorage.removeItem('vigilance_logged_in');
+      localStorage.removeItem('vigilance_current_user');
+      window.location.replace('login.html');
+    }
+
+    // Dynamic user details load
+    function loadUserDetails() {
+      const user = JSON.parse(localStorage.getItem('vigilance_current_user') || '{"name":"Admin User","role":"System Admin","email":"admin@vigilance.ai"}');
+      
+      const headerName = document.getElementById('header-user-name');
+      const headerRole = document.getElementById('header-user-role');
+      const dropdownName = document.getElementById('dropdown-user-name');
+      const dropdownEmail = document.getElementById('dropdown-user-email');
+      const dropdownRole = document.getElementById('dropdown-user-role');
+
+      if (headerName) headerName.textContent = user.name;
+      if (headerRole) headerRole.textContent = user.role;
+      if (dropdownName) dropdownName.textContent = user.name;
+      if (dropdownEmail) dropdownEmail.textContent = user.email;
+      if (dropdownRole) dropdownRole.textContent = user.role;
+    }
+  </script>
+</body>
+</html>

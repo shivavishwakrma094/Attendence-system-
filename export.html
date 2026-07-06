@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <!-- Session Security Guard -->
+  <script>
+    if (localStorage.getItem('vigilance_logged_in') !== 'true') {
+      window.location.replace('login.html');
+    }
+  </script>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Vigilance AI - Export Analytics</title>
+  <meta name="description" content="Vigilance AI biometric monitoring telemetry compilation and export suite, powered by BuildHub.">
+  
+  <!-- Typography & Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Custom Tailwind Theme Definition -->
+  <script id="tailwind-config">
+    try {
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "#131315",
+              primary: "#ffd165",
+              "primary-container": "#ffdf9a",
+              "on-primary": "#1b1b1e",
+              "on-surface": "#e5e1e4",
+              "on-surface-variant": "#d3c5ac",
+              outline: "#9b8f79",
+              error: "#ffb4ab",
+              "surface-container-lowest": "#0e0e10",
+              "surface-container-low": "#1c1b1d",
+              "surface-container": "#201f22",
+              "surface-container-high": "#2a2a2c",
+              "surface-container-highest": "#353437",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              label: ["'Hanken Grotesk'", "sans-serif"],
+            }
+          },
+        },
+      }
+    } catch (_e) {}
+  </script>
+
+  <!-- Custom Styles for Effects & Animations -->
+  <style>
+    /* Subtle Grid Overlay */
+    .grid-overlay {
+      background-image: 
+        linear-gradient(rgba(255, 209, 101, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 209, 101, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: center;
+    }
+    
+    /* Yellow Gradient Glows */
+    .yellow-gradient {
+      background: 
+        radial-gradient(circle at 80% 20%, rgba(255, 209, 101, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 10% 80%, rgba(255, 209, 101, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 209, 101, 0.02) 0%, transparent 70%);
+    }
+
+    /* Glassmorphism Panels */
+    .glass-panel {
+      background: rgba(20, 20, 22, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    /* Glowing Yellow Border/Shadow Effect */
+    .glow-yellow {
+      box-shadow: 0 0 45px -10px rgba(255, 209, 101, 0.15);
+      border: 1px solid rgba(255, 209, 101, 0.15);
+    }
+
+    /* Hide default scrollbars */
+    .scroll-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scroll-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    /* Pulsing badge animation */
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; box-shadow: 0 0 8px rgba(255, 209, 101, 0.4); }
+      50% { opacity: 1; box-shadow: 0 0 18px rgba(255, 209, 101, 0.8); }
+    }
+    .pulse-badge {
+      animation: pulse-glow 2.5s infinite;
+    }
+
+    /* Table custom scrollbar */
+    .table-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .table-scroll::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 209, 101, 0.15);
+      border-radius: 8px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 209, 101, 0.3);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-sans overflow-hidden h-screen flex flex-col relative select-none">
+
+  <!-- Grid & Ambient Glow Overlays -->
+  <div class="fixed inset-0 grid-overlay pointer-events-none z-0"></div>
+  <div class="fixed inset-0 yellow-gradient pointer-events-none z-0"></div>
+
+  <!-- Sticky backdrop-blurred top header -->
+  <header class="bg-surface-container-lowest/40 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5 w-full">
+    <div class="flex justify-between items-center px-6 py-4 w-full">
+      
+      <!-- Brand Logotype (Clickable) -->
+      <a href="dashboard.html" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+          <span class="material-symbols-outlined text-on-primary text-xl font-bold" style="font-variation-settings: 'FILL' 1;">shield</span>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight text-on-surface flex items-center gap-1 font-label">
+          Vigilance <span class="text-primary font-black uppercase text-sm tracking-wider font-sans">AI</span>
+        </h1>
+      </a>
+
+      <!-- Navigation links -->
+      <nav class="hidden md:flex items-center gap-8 font-label">
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="dashboard.html" id="nav-dashboard">Dashboard</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="livefeed.html" id="nav-livefeed">Live Feed</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="analytics.html" id="nav-analytics">Analytics</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="settings.html" id="nav-settings">Settings</a>
+      </nav>
+
+      <!-- User controls -->
+      <div class="flex items-center gap-4 pl-6 border-l border-white/10 font-label relative">
+        <div class="text-right hidden sm:block">
+          <p id="header-user-name" class="text-xs font-black text-on-surface">Admin User</p>
+          <p id="header-user-role" class="text-[9px] text-primary/70 font-bold uppercase tracking-widest">System Admin</p>
+        </div>
+        <div onclick="toggleProfileDropdown()" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center border border-white/10 cursor-pointer hover:border-primary/45 transition-colors">
+          <span class="material-symbols-outlined text-primary text-lg">person</span>
+        </div>
+        
+        <!-- Profile Dropdown Menu -->
+        <div id="profile-dropdown" class="absolute right-0 top-12 w-56 glass-panel border border-white/10 rounded-2xl p-4 shadow-xl z-50 flex flex-col gap-3 font-label hidden">
+          <div class="border-b border-white/5 pb-2">
+            <p id="dropdown-user-name" class="text-xs font-black text-on-surface">Admin User</p>
+            <p id="dropdown-user-email" class="text-[9px] text-outline mt-0.5">admin@vigilance.ai</p>
+            <p id="dropdown-user-role" class="text-[8px] text-primary font-black uppercase tracking-wider mt-1">System Admin</p>
+          </div>
+          <button type="button" onclick="handleLogout()" class="w-full py-2 bg-error/10 hover:bg-error/20 text-error border border-error/20 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
+            <span class="material-symbols-outlined text-sm">logout</span>
+            Sign Out Session
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Core Page Body (Main Area) -->
+  <div class="flex flex-1 overflow-hidden relative z-10 w-full">
+    
+    <!-- Left Sidebar: Vigilance System -->
+    <aside class="hidden md:flex flex-col h-full w-60 bg-surface-container-lowest/30 backdrop-blur-2xl border-r border-white/5 font-label">
+      <div class="flex flex-col h-full justify-between py-6">
+        
+        <div class="space-y-8">
+          <!-- Top Info Badge -->
+          <div class="px-6 flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-xl">analytics</span>
+            </div>
+            <div>
+              <h2 class="font-extrabold text-on-surface uppercase tracking-widest text-[9px]">Vigilance System</h2>
+              <p class="text-[10px] text-primary font-black uppercase tracking-wider" id="sidebar-online-status">Online • Monitoring</p>
+            </div>
+          </div>
+
+          <!-- Nav Menu -->
+          <nav class="space-y-1.5 px-3">
+            <a href="dashboard.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">dashboard</span>
+              <span>Dashboard Overview</span>
+            </a>
+
+            <a href="registration.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg" data-original-icon="person_add">person_add</span>
+              <span>Registration</span>
+            </a>
+            
+            <a href="livefeed.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;" data-original-icon="center_focus_strong">center_focus_strong</span>
+              <span>Live Feed</span>
+            </a>
+
+            <a href="analytics.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">analytics</span>
+              <span>Analytics Insights</span>
+            </a>
+
+            <a href="export.html" class="bg-primary text-on-primary flex items-center gap-3.5 px-4 py-3 rounded-xl border border-primary/15 transition-all text-xs font-black uppercase tracking-wider shadow-lg shadow-primary/5">
+              <span class="material-symbols-outlined text-lg">description</span>
+              <span>Export Telemetry</span>
+            </a>
+            
+            <a href="settings.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">settings</span>
+              <span>System Settings</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Sidebar footer / System stats -->
+        <div class="px-6 space-y-5">
+          <div class="bg-surface-container-high/40 p-4 rounded-2xl border border-white/5 backdrop-blur-md">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[9px] uppercase font-bold text-outline tracking-wider">Neural Load</span>
+              <span class="text-[9px] text-primary font-black uppercase tracking-wider">Optimal</span>
+            </div>
+            <div class="h-1.5 bg-surface-container-lowest rounded-full overflow-hidden">
+              <div class="h-full bg-primary w-[42%] shadow-[0_0_8px_rgba(255,209,101,0.4)]"></div>
+            </div>
+          </div>
+          <p class="text-[9px] text-outline font-black tracking-widest text-center opacity-40 uppercase">
+            v2.4.0 BuildHub Engine
+          </p>
+        </div>
+        
+      </div>
+    </aside>
+
+    <!-- Main View: Export Workspace -->
+    <main class="flex-1 flex flex-col p-6 overflow-hidden relative">
+      <div class="flex flex-col gap-6 h-full overflow-y-auto scroll-hide">
+        
+        <!-- Welcome banner -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-on-surface tracking-tight font-sans">Analytics Export Workspace</h2>
+            <p class="text-xs text-outline font-label mt-1">Compile and filter database tables for local CSV, JSON, or TXT audits.</p>
+          </div>
+          <div class="flex items-center gap-2.5 font-label">
+            <span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(255,209,101,0.8)]"></span>
+            <span class="text-[10px] text-primary font-black uppercase tracking-wider">Ingestion Core Synchronized</span>
+          </div>
+        </div>
+
+        <!-- Export Setup Panels -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+          
+          <!-- Parameters Setup Form (Columns 1-2) -->
+          <div class="lg:col-span-2 glass-panel rounded-2xl p-6 border border-white/5 flex flex-col gap-5">
+            <div class="border-b border-white/5 pb-4">
+              <h3 class="text-sm font-bold text-on-surface font-sans">1. Filter Parameters</h3>
+              <p class="text-[10px] text-outline font-label mt-0.5">Specify report classifications and bounds.</p>
+            </div>
+
+            <!-- Parameters fields -->
+            <form id="export-params-form" class="space-y-4 font-label" onsubmit="event.preventDefault();">
+              
+              <!-- Report Type selection -->
+              <div class="flex flex-col gap-1.5">
+                <label for="export-type" class="text-[9px] font-black text-outline uppercase tracking-wider">Report Log Target</label>
+                <select id="export-type" onchange="loadPreviewData()" class="px-3.5 py-2.5 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary/45 transition-colors">
+                  <option value="attendance">Biometric Roster Attendance</option>
+                  <option value="ingress">Sensor Ingress Log Matches</option>
+                  <option value="anomalies">Security Event Anomalies</option>
+                </select>
+              </div>
+
+              <!-- Time scale Selection -->
+              <div class="flex flex-col gap-1.5">
+                <label for="export-range" class="text-[9px] font-black text-outline uppercase tracking-wider">Timeline Window</label>
+                <select id="export-range" class="px-3.5 py-2.5 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary/45 transition-colors">
+                  <option value="today">Today (Active Telemetry)</option>
+                  <option value="7days">Last 7 Days</option>
+                  <option value="30days">Last 30 Days</option>
+                </select>
+              </div>
+
+              <!-- Department Filter -->
+              <div class="flex flex-col gap-1.5" id="filter-dept-container">
+                <label for="export-dept" class="text-[9px] font-black text-outline uppercase tracking-wider">Department Division</label>
+                <select id="export-dept" onchange="loadPreviewData()" class="px-3.5 py-2.5 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary/45 transition-colors">
+                  <option value="all">All Departments</option>
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="Electrical Eng">Electrical Engineering</option>
+                  <option value="Mechanical Eng">Mechanical Engineering</option>
+                  <option value="Data Science">Data Science</option>
+                  <option value="Bioengineering">Bioengineering</option>
+                </select>
+              </div>
+
+              <!-- Sensor Node Filter -->
+              <div class="flex flex-col gap-1.5" id="filter-node-container">
+                <label for="export-node" class="text-[9px] font-black text-outline uppercase tracking-wider">Sensor Camera Node</label>
+                <select id="export-node" onchange="loadPreviewData()" class="px-3.5 py-2.5 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary/45 transition-colors">
+                  <option value="all">All Active Cameras</option>
+                  <option value="Gate 1 Cam">Gate 1 Cam</option>
+                  <option value="Main Hallway">Main Hallway</option>
+                  <option value="Library Entrance">Library Entrance</option>
+                  <option value="Class 101 Cam">Class 101 Cam</option>
+                  <option value="Lab A Terminal">Lab A Terminal</option>
+                  <option value="Parking Entrance">Parking Entrance</option>
+                </select>
+              </div>
+
+              <!-- Status Classification -->
+              <div class="flex flex-col gap-1.5" id="filter-status-container">
+                <label for="export-status" class="text-[9px] font-black text-outline uppercase tracking-wider">Roster Logs Status</label>
+                <select id="export-status" onchange="loadPreviewData()" class="px-3.5 py-2.5 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary/45 transition-colors">
+                  <option value="all">All Status Classifications</option>
+                  <option value="Present">Present</option>
+                  <option value="Late">Late</option>
+                  <option value="Absent">Absent</option>
+                </select>
+              </div>
+
+              <!-- File Format Selector -->
+              <div class="flex flex-col gap-1.5 pt-2">
+                <label class="text-[9px] font-black text-outline uppercase tracking-wider">Target Export Format</label>
+                <div class="grid grid-cols-3 gap-2 mt-1">
+                  
+                  <label class="flex flex-col items-center justify-center p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/20 rounded-2xl cursor-pointer select-none text-center gap-1 group format-card-selected" id="lbl-format-csv">
+                    <input type="radio" name="export-format" value="csv" checked onclick="switchFormat('csv')" class="sr-only">
+                    <span class="material-symbols-outlined text-outline group-hover:text-primary text-base transition-colors" id="icon-csv" style="color: #ffd165;">description</span>
+                    <span class="text-[9px] font-bold text-on-surface uppercase tracking-wider">CSV</span>
+                  </label>
+
+                  <label class="flex flex-col items-center justify-center p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/20 rounded-2xl cursor-pointer select-none text-center gap-1 group" id="lbl-format-json">
+                    <input type="radio" name="export-format" value="json" onclick="switchFormat('json')" class="sr-only">
+                    <span class="material-symbols-outlined text-outline group-hover:text-primary text-base transition-colors" id="icon-json">code</span>
+                    <span class="text-[9px] font-bold text-on-surface uppercase tracking-wider">JSON</span>
+                  </label>
+
+                  <label class="flex flex-col items-center justify-center p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/20 rounded-2xl cursor-pointer select-none text-center gap-1 group" id="lbl-format-txt">
+                    <input type="radio" name="export-format" value="txt" onclick="switchFormat('txt')" class="sr-only">
+                    <span class="material-symbols-outlined text-outline group-hover:text-primary text-base transition-colors" id="icon-txt">terminal</span>
+                    <span class="text-[9px] font-bold text-on-surface uppercase tracking-wider">TXT Log</span>
+                  </label>
+
+                </div>
+              </div>
+
+              <!-- Compile button -->
+              <div class="pt-4 border-t border-white/5">
+                <button type="button" onclick="executeCompile()" id="btn-compile" class="w-full py-3.5 bg-primary text-on-primary font-black uppercase tracking-wider text-[10px] rounded-xl hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/5 active:scale-[0.98]">
+                  <span class="material-symbols-outlined text-base">download</span>
+                  <span id="btn-compile-text">Compile & Download Report</span>
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- Live Preview Box (Columns 3-5) -->
+          <div class="lg:col-span-3 glass-panel rounded-2xl p-6 border border-white/5 flex flex-col gap-4 overflow-hidden min-h-[500px]">
+            <div class="border-b border-white/5 pb-4 flex justify-between items-center">
+              <div>
+                <h3 class="text-sm font-bold text-on-surface font-sans">2. Live Compilation Data Preview</h3>
+                <p class="text-[10px] text-outline font-label mt-0.5">Displays real-time database matching query rows.</p>
+              </div>
+              <span id="preview-row-count" class="text-[8px] text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded font-black uppercase tracking-wider font-label">0 matches</span>
+            </div>
+
+            <!-- Preview Data Grid Table -->
+            <div class="flex-1 overflow-x-auto scroll-hide table-scroll min-h-[350px]">
+              <table class="w-full text-left border-collapse text-xs font-label">
+                <thead id="preview-table-header">
+                  <!-- Dynamic Headers -->
+                </thead>
+                <tbody id="preview-table-body" class="divide-y divide-white/[0.02] text-on-surface/90">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Preview footer information -->
+            <div class="border-t border-white/5 pt-3.5 flex justify-between items-center text-[9px] text-outline font-label">
+              <span>Preview represents top matching records.</span>
+              <span class="flex items-center gap-1.5 font-bold uppercase text-[8px] text-primary">
+                <span class="w-1 h-1 rounded-full bg-primary animate-ping"></span>
+                Roster Preview Synced
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="bg-surface-container-lowest/60 backdrop-blur-xl w-full border-t border-white/5 relative z-50 font-label">
+    <div class="flex flex-col md:flex-row justify-between items-center px-6 py-4 gap-3 w-full">
+      <div class="flex items-center gap-2">
+        <span class="text-[9px] font-extrabold text-outline uppercase tracking-wider">
+          © 2024 Vigilance AI Ecosystem. BuildHub Powered.
+        </span>
+      </div>
+      <div class="flex gap-6 items-center">
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors uppercase tracking-wider" href="#">Docs</a>
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors uppercase tracking-wider" href="#">Privacy</a>
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors flex items-center gap-2 uppercase tracking-wider" href="#">
+          <span id="footer-status-dot" class="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)]"></span>
+          Status: <span id="footer-status-text">Operational</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Notification Toast container -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 glass-panel border border-primary/25 rounded-2xl px-5 py-3.5 flex items-center gap-3 shadow-lg shadow-primary/5 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+    <span class="material-symbols-outlined text-primary text-xl" id="toast-icon">info</span>
+    <div class="font-label text-xs">
+      <p class="font-bold text-on-surface" id="toast-title">Toast Title</p>
+      <p class="text-outline text-[10px] mt-0.5" id="toast-desc">Toast details.</p>
+    </div>
+  </div>
+
+  <!-- JavaScript Log & Compile Handling Logic -->
+  <script>
+    // Data Sources Pool
+    const attendanceRoster = [
+      { id: "VIG-0102", name: "Alex Rivera", department: "Computer Science", time: "08:15:22", node: "Gate 1 Cam", confidence: "98.4%", status: "Present" },
+      { id: "VIG-0145", name: "Sofia Zhang", department: "Electrical Eng", time: "08:16:45", node: "Main Hallway", confidence: "97.8%", status: "Present" },
+      { id: "VIG-0231", name: "Marcus Thorne", department: "Mechanical Eng", time: "08:22:12", node: "Library Entrance", confidence: "96.5%", status: "Present" },
+      { id: "VIG-0089", name: "Elena Rossi", department: "Data Science", time: "08:42:30", node: "Class 101 Cam", confidence: "99.1%", status: "Late" },
+      { id: "VIG-0311", name: "Lucas Vance", department: "Bioengineering", time: "08:10:05", node: "Gate 1 Cam", confidence: "95.2%", status: "Present" },
+      { id: "VIG-0182", name: "Zara Patel", department: "Computer Science", time: "08:18:19", node: "Main Hallway", confidence: "98.7%", status: "Present" },
+      { id: "VIG-0294", name: "Liam O'Connor", department: "Civil Eng", time: "--:--:--", node: "None", confidence: "0.0%", status: "Absent" },
+      { id: "VIG-0112", name: "Aria Takahashi", department: "Physics", time: "08:55:10", node: "Class 101 Cam", confidence: "94.8%", status: "Late" },
+      { id: "VIG-0205", name: "Ethan Hunt", department: "Information Tech", time: "--:--:--", node: "None", confidence: "0.0%", status: "Absent" },
+      { id: "VIG-0164", name: "Chloe Dupont", department: "Chemistry", time: "08:05:14", node: "Gate 1 Cam", confidence: "99.6%", status: "Present" }
+    ];
+
+    const ingressTelemetry = [
+      { time: "09:45:12", node: "Main Hallway", user: "Sofia Zhang", direction: "Inbound", confidence: "98.1%" },
+      { time: "09:33:05", node: "Gate 1 Cam", user: "Alex Rivera", direction: "Inbound", confidence: "99.2%" },
+      { time: "09:12:44", node: "Lab A Terminal", user: "Marcus Thorne", direction: "Secure Lock", confidence: "97.4%" },
+      { time: "09:05:15", node: "Library Entrance", user: "Lucas Vance", direction: "Inbound", confidence: "96.8%" },
+      { time: "08:55:10", node: "Class 101 Cam", user: "Aria Takahashi", direction: "Inbound", confidence: "94.8%" },
+      { time: "08:42:30", node: "Class 101 Cam", user: "Elena Rossi", direction: "Inbound", confidence: "99.1%" },
+      { time: "08:22:12", node: "Library Entrance", user: "Marcus Thorne", direction: "Inbound", confidence: "96.5%" },
+      { time: "08:18:19", node: "Main Hallway", user: "Zara Patel", direction: "Inbound", confidence: "98.7%" },
+      { time: "08:16:45", node: "Main Hallway", user: "Sofia Zhang", direction: "Inbound", confidence: "97.8%" },
+      { time: "08:15:22", node: "Gate 1 Cam", user: "Alex Rivera", direction: "Inbound", confidence: "98.4%" }
+    ];
+
+    const securityAnomalies = [
+      { time: "09:20:15", node: "Parking Entrance", exception: "Unknown Identity Scored", details: "Confidence match score (64.2%) below threshold bounds", severity: "Warning" },
+      { time: "08:45:10", node: "Gate 1 Cam", exception: "Tailgating Alert Triggered", details: "Two faces matched in single access lane sensor lock", severity: "Info" },
+      { time: "07:30:15", node: "Library Entrance", exception: "Access Attempt Offline Node", details: "Unscheduled login attempt on node in maintenance mode", severity: "Warning" },
+      { time: "06:12:00", node: "Main Hallway", exception: "Anti-Spoofing Verification Failure", details: "Biometric 3D depth matching parameters failed signature", severity: "Critical" }
+    ];
+
+    // State Variables
+    let selectedFormat = "csv";
+
+    // Format selection visual triggers
+    function switchFormat(format) {
+      selectedFormat = format;
+      
+      // Reset format styles
+      document.getElementById('lbl-format-csv').className = "flex flex-col items-center justify-center p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/20 rounded-2xl cursor-pointer select-none text-center gap-1 group";
+      document.getElementById('lbl-format-json').className = "flex flex-col items-center justify-center p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/20 rounded-2xl cursor-pointer select-none text-center gap-1 group";
+      document.getElementById('lbl-format-txt').className = "flex flex-col items-center justify-center p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/20 rounded-2xl cursor-pointer select-none text-center gap-1 group";
+      
+      document.getElementById('icon-csv').style.color = '#9b8f79';
+      document.getElementById('icon-json').style.color = '#9b8f79';
+      document.getElementById('icon-txt').style.color = '#9b8f79';
+
+      // Set active select style
+      const activeCard = document.getElementById(`lbl-format-${format}`);
+      activeCard.classList.add('border-primary/20', 'bg-primary/5');
+      document.getElementById(`icon-${format}`).style.color = '#ffd165';
+    }
+
+    // Dynamic Preview Tables Loader
+    function loadPreviewData() {
+      const type = document.getElementById('export-type').value;
+      const deptFilter = document.getElementById('export-dept').value;
+      const statusFilter = document.getElementById('export-status').value;
+      const nodeFilter = document.getElementById('export-node').value;
+
+      const headers = document.getElementById('preview-table-header');
+      const tbody = document.getElementById('preview-table-body');
+      const counter = document.getElementById('preview-row-count');
+
+      tbody.innerHTML = '';
+      headers.innerHTML = '';
+
+      // Toggles Filter Visibility based on report target type
+      if (type === 'attendance') {
+        document.getElementById('filter-dept-container').style.display = 'flex';
+        document.getElementById('filter-status-container').style.display = 'flex';
+        document.getElementById('filter-node-container').style.display = 'flex';
+      } else if (type === 'ingress') {
+        document.getElementById('filter-dept-container').style.display = 'none';
+        document.getElementById('filter-status-container').style.display = 'none';
+        document.getElementById('filter-node-container').style.display = 'flex';
+      } else {
+        // anomalies
+        document.getElementById('filter-dept-container').style.display = 'none';
+        document.getElementById('filter-status-container').style.display = 'none';
+        document.getElementById('filter-node-container').style.display = 'flex';
+      }
+
+      if (type === 'attendance') {
+        // Headers
+        headers.innerHTML = `
+          <tr class="border-b border-white/5 text-outline text-[9px] uppercase tracking-wider">
+            <th class="py-3 px-4">Student ID</th>
+            <th class="py-3 px-4">Student Name</th>
+            <th class="py-3 px-4">Department</th>
+            <th class="py-3 px-4">Verification Time</th>
+            <th class="py-3 px-4">Camera Node</th>
+            <th class="py-3 px-4">Status</th>
+          </tr>
+        `;
+
+        // Filtering logs
+        const filtered = attendanceRoster.filter(item => {
+          const matchDept = deptFilter === 'all' || item.department === deptFilter;
+          const matchStatus = statusFilter === 'all' || item.status === statusFilter;
+          const matchNode = nodeFilter === 'all' || item.node === nodeFilter;
+          return matchDept && matchStatus && matchNode;
+        });
+
+        counter.textContent = `${filtered.length} matches`;
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-outline/60 italic">No telemetry data records matching parameters.</td></tr>`;
+          return;
+        }
+
+        filtered.forEach(item => {
+          let statusBadge = '';
+          if (item.status === 'Present') {
+            statusBadge = `<span class="bg-primary/10 text-primary border border-primary/20 text-[8px] font-black uppercase px-2 py-0.5 rounded">Present</span>`;
+          } else if (item.status === 'Late') {
+            statusBadge = `<span class="bg-primary/5 text-primary/70 border border-primary/10 text-[8px] font-bold uppercase px-2 py-0.5 rounded">Late</span>`;
+          } else {
+            statusBadge = `<span class="bg-error/10 text-error border border-error/20 text-[8px] font-black uppercase px-2 py-0.5 rounded">Absent</span>`;
+          }
+
+          const row = document.createElement('tr');
+          row.className = "hover:bg-white/[0.02] transition-colors";
+          row.innerHTML = `
+            <td class="py-3 px-4 font-bold text-outline">${item.id}</td>
+            <td class="py-3 px-4 font-extrabold text-on-surface font-sans">${item.name}</td>
+            <td class="py-3 px-4 text-outline/80">${item.department}</td>
+            <td class="py-3 px-4 text-outline/80">${item.time}</td>
+            <td class="py-3 px-4 font-semibold text-outline">${item.node}</td>
+            <td class="py-3 px-4">${statusBadge}</td>
+          `;
+          tbody.appendChild(row);
+        });
+
+      } else if (type === 'ingress') {
+        headers.innerHTML = `
+          <tr class="border-b border-white/5 text-outline text-[9px] uppercase tracking-wider">
+            <th class="py-3 px-4">Timestamp</th>
+            <th class="py-3 px-4">Camera Sensor Node</th>
+            <th class="py-3 px-4">Scanned User</th>
+            <th class="py-3 px-4">Direction Matrix</th>
+            <th class="py-3 px-4">Match Rate</th>
+          </tr>
+        `;
+
+        const filtered = ingressTelemetry.filter(item => {
+          return nodeFilter === 'all' || item.node === nodeFilter;
+        });
+
+        counter.textContent = `${filtered.length} matches`;
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-outline/60 italic">No telemetry data records matching parameters.</td></tr>`;
+          return;
+        }
+
+        filtered.forEach(item => {
+          const row = document.createElement('tr');
+          row.className = "hover:bg-white/[0.02] transition-colors";
+          row.innerHTML = `
+            <td class="py-3 px-4 text-outline/80">${item.time}</td>
+            <td class="py-3 px-4 font-bold text-outline">${item.node}</td>
+            <td class="py-3 px-4 font-extrabold text-on-surface font-sans">${item.user}</td>
+            <td class="py-3 px-4 text-outline/80 font-semibold">${item.direction}</td>
+            <td class="py-3 px-4 font-black text-primary">${item.confidence}</td>
+          `;
+          tbody.appendChild(row);
+        });
+
+      } else {
+        // anomalies
+        headers.innerHTML = `
+          <tr class="border-b border-white/5 text-outline text-[9px] uppercase tracking-wider">
+            <th class="py-3 px-4">Anomaly Time</th>
+            <th class="py-3 px-4">Sensor Node</th>
+            <th class="py-3 px-4">Exception Description</th>
+            <th class="py-3 px-4">Severity Code</th>
+          </tr>
+        `;
+
+        const filtered = securityAnomalies.filter(item => {
+          return nodeFilter === 'all' || item.node === nodeFilter;
+        });
+
+        counter.textContent = `${filtered.length} matches`;
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-outline/60 italic">No telemetry data records matching parameters.</td></tr>`;
+          return;
+        }
+
+        filtered.forEach(item => {
+          let severityBadge = '';
+          if (item.severity === 'Critical') {
+            severityBadge = `<span class="bg-error/10 text-error border border-error/20 text-[8px] font-black uppercase px-2 py-0.5 rounded animate-pulse">Critical</span>`;
+          } else if (item.severity === 'Warning') {
+            severityBadge = `<span class="bg-primary/10 text-primary border border-primary/20 text-[8px] font-black uppercase px-2 py-0.5 rounded">Warning</span>`;
+          } else {
+            severityBadge = `<span class="bg-white/5 text-outline border border-white/10 text-[8px] font-bold uppercase px-2 py-0.5 rounded">Info</span>`;
+          }
+
+          const row = document.createElement('tr');
+          row.className = "hover:bg-white/[0.02] transition-colors";
+          row.innerHTML = `
+            <td class="py-3 px-4 text-outline/80">${item.time}</td>
+            <td class="py-3 px-4 font-bold text-outline">${item.node}</td>
+            <td class="py-3 px-4 text-on-surface font-sans">
+              <span class="font-extrabold text-xs block text-primary/95">${item.exception}</span>
+              <span class="text-[9px] text-outline block mt-0.5">${item.details}</span>
+            </td>
+            <td class="py-3 px-4">${severityBadge}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    // Execute Compilation and File Ingestion
+    function executeCompile() {
+      const type = document.getElementById('export-type').value;
+      const deptFilter = document.getElementById('export-dept').value;
+      const statusFilter = document.getElementById('export-status').value;
+      const nodeFilter = document.getElementById('export-node').value;
+      const range = document.getElementById('export-range').value;
+
+      const compileBtn = document.getElementById('btn-compile');
+      const btnText = document.getElementById('btn-compile-text');
+
+      compileBtn.disabled = true;
+      compileBtn.classList.add('opacity-50', 'pointer-events-none');
+      
+      const states = [
+        "Verifying security credentials...",
+        "Compiling query records...",
+        "Generating checksum signatures...",
+        "Generating file package..."
+      ];
+
+      let stateIdx = 0;
+      btnText.textContent = states[0];
+
+      const interval = setInterval(() => {
+        stateIdx++;
+        if (stateIdx < states.length) {
+          btnText.textContent = states[stateIdx];
+        } else {
+          clearInterval(interval);
+          
+          // Trigger actual file compilation and download
+          triggerDownload(type, range, deptFilter, statusFilter, nodeFilter);
+          
+          // Restore button
+          compileBtn.disabled = false;
+          compileBtn.classList.remove('opacity-50', 'pointer-events-none');
+          btnText.textContent = "Compile & Download Report";
+          
+          showToast("Compile Successful", "Telemetry data audit log compiled and downloaded.", "download_done");
+        }
+      }, 550);
+    }
+
+    // Compile dynamic dataset and trigger file download
+    function triggerDownload(type, range, dept, status, node) {
+      let fileContent = "";
+      let filename = `Vigilance_Report_${type}_${new Date().toISOString().split('T')[0]}`;
+      
+      // Get filtered dataset
+      let dataset = [];
+      if (type === 'attendance') {
+        dataset = attendanceRoster.filter(item => {
+          return (dept === 'all' || item.department === dept) &&
+                 (status === 'all' || item.status === status) &&
+                 (node === 'all' || item.node === node);
+        });
+      } else if (type === 'ingress') {
+        dataset = ingressTelemetry.filter(item => {
+          return node === 'all' || item.node === node;
+        });
+      } else {
+        dataset = securityAnomalies.filter(item => {
+          return node === 'all' || item.node === node;
+        });
+      }
+
+      // Generate File Content depending on selection
+      if (selectedFormat === 'csv') {
+        filename += ".csv";
+        if (type === 'attendance') {
+          fileContent = "Student ID,Student Name,Department,Time,Camera Node,Status\n";
+          dataset.forEach(item => {
+            fileContent += `"${item.id}","${item.name}","${item.department}","${item.time}","${item.node}","${item.status}"\n`;
+          });
+        } else if (type === 'ingress') {
+          fileContent = "Timestamp,Camera Node,Scanned User,Direction,Confidence\n";
+          dataset.forEach(item => {
+            fileContent += `"${item.time}","${item.node}","${item.user}","${item.direction}","${item.confidence}"\n`;
+          });
+        } else {
+          fileContent = "Anomaly Time,Sensor Node,Exception,Details,Severity\n";
+          dataset.forEach(item => {
+            fileContent += `"${item.time}","${item.node}","${item.exception}","${item.details}","${item.severity}"\n`;
+          });
+        }
+      } else if (selectedFormat === 'json') {
+        filename += ".json";
+        fileContent = JSON.stringify({
+          system: "Vigilance AI Ecosystem",
+          version: "v2.4.0",
+          export_date: new Date().toISOString(),
+          log_type: type,
+          filters: { range, dept, status, node },
+          records_count: dataset.length,
+          data: dataset
+        }, null, 2);
+      } else {
+        // txt
+        filename += ".txt";
+        fileContent = `========================================================================\n`;
+        fileContent += `VIGILANCE AI SECURITY AUDIT RECORD\n`;
+        fileContent += `Exported: ${new Date().toUTCString()}\n`;
+        fileContent += `Log Target: ${type.toUpperCase()} | Range: ${range.toUpperCase()}\n`;
+        fileContent += `Records Count: ${dataset.length} Matches\n`;
+        fileContent += `========================================================================\n\n`;
+        
+        dataset.forEach((item, index) => {
+          fileContent += `[RECORD #${index + 1}]\n`;
+          if (type === 'attendance') {
+            fileContent += `Student: ${item.name} (ID: ${item.id}) | Dept: ${item.department}\n`;
+            fileContent += `Verified: ${item.time} at node: ${item.node} | Roster Status: ${item.status}\n`;
+          } else if (type === 'ingress') {
+            fileContent += `Time: ${item.time} | Node: ${item.node} | User: ${item.user}\n`;
+            fileContent += `Direction Matrix: ${item.direction} | Match Accuracy: ${item.confidence}\n`;
+          } else {
+            fileContent += `Time: ${item.time} | Node: ${item.node} | Severity: ${item.severity}\n`;
+            fileContent += `Exception: ${item.exception}\n`;
+            fileContent += `Details: ${item.details}\n`;
+          }
+          fileContent += `------------------------------------------------------------------------\n`;
+        });
+      }
+
+      // Download anchor trigger
+      const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", url);
+      downloadAnchor.setAttribute("download", filename);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // Toggle Profile Dropdown
+    function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profile-dropdown');
+      if (dropdown) dropdown.classList.toggle('hidden');
+    }
+
+    // Close dropdown on click outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('profile-dropdown');
+      const avatarBtn = dropdown ? dropdown.previousElementSibling : null;
+      if (dropdown && avatarBtn && !dropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // Handle logout action
+    function handleLogout() {
+      localStorage.removeItem('vigilance_logged_in');
+      localStorage.removeItem('vigilance_current_user');
+      window.location.replace('login.html');
+    }
+
+    // Load LocalStorage Configurations
+    function loadConfigSettings() {
+      // 1. Footer status
+      const status = localStorage.getItem('vigilance_system_status') || 'Operational';
+      const textEl = document.getElementById('footer-status-text');
+      const dotEl = document.getElementById('footer-status-dot');
+      const sidebarStatus = document.getElementById('sidebar-online-status');
+      
+      if (textEl && dotEl) {
+        textEl.textContent = status;
+        if (status === 'Operational') {
+          dotEl.className = "w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)]";
+          sidebarStatus.innerHTML = "Online • Monitoring";
+          sidebarStatus.className = "text-[10px] text-primary font-black uppercase tracking-wider";
+        } else if (status === 'Maintenance Mode') {
+          dotEl.className = "w-1.5 h-1.5 bg-outline rounded-full shadow-[0_0_6px_rgba(155,143,121,0.8)]";
+          sidebarStatus.innerHTML = "System Maintenance";
+          sidebarStatus.className = "text-[10px] text-outline font-black uppercase tracking-wider";
+        } else if (status === 'Shielded Lockdown') {
+          dotEl.className = "w-1.5 h-1.5 bg-error rounded-full shadow-[0_0_6px_rgba(255,180,171,0.8)] animate-pulse";
+          sidebarStatus.innerHTML = "Node Lockdown Active";
+          sidebarStatus.className = "text-[10px] text-error font-black uppercase tracking-wider animate-pulse";
+        } else if (status === 'Simulation Active') {
+          dotEl.className = "w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)] animate-ping";
+          sidebarStatus.innerHTML = "Simulation Sandbox";
+          sidebarStatus.className = "text-[10px] text-primary font-black uppercase tracking-wider animate-pulse";
+        }
+      }
+
+      // 2. User details
+      const user = JSON.parse(localStorage.getItem('vigilance_current_user') || '{"name":"Admin User","role":"System Admin","email":"admin@vigilance.ai"}');
+      
+      const headerName = document.getElementById('header-user-name');
+      const headerRole = document.getElementById('header-user-role');
+      const dropdownName = document.getElementById('dropdown-user-name');
+      const dropdownEmail = document.getElementById('dropdown-user-email');
+      const dropdownRole = document.getElementById('dropdown-user-role');
+
+      if (headerName) headerName.textContent = user.name;
+      if (headerRole) headerRole.textContent = user.role;
+      if (dropdownName) dropdownName.textContent = user.name;
+      if (dropdownEmail) dropdownEmail.textContent = user.email;
+      if (dropdownRole) dropdownRole.textContent = user.role;
+    }
+
+    // Toast alert helper
+    function showToast(title, desc, icon = "info") {
+      const toast = document.getElementById('toast');
+      const toastTitle = document.getElementById('toast-title');
+      const toastDesc = document.getElementById('toast-desc');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastTitle.textContent = title;
+      toastDesc.textContent = desc;
+      toastIcon.textContent = icon;
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      }, 3500);
+    }
+
+    // Initialize Page
+    window.addEventListener('load', () => {
+      loadConfigSettings();
+      loadPreviewData();
+    });
+
+    // Tactile button animations
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('mousedown', () => {
+        btn.classList.add('scale-[0.97]');
+      });
+      btn.addEventListener('mouseup', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+    });
+  </script>
+</body>
+</html>

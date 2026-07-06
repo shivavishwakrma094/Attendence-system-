@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Vigilance AI - Admin Portal Sign In</title>
+  <meta name="description" content="Secure portal sign in for Vigilance AI monitoring and biometric dashboard admin controls.">
+  
+  <!-- Typography & Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Custom Tailwind Theme Definition -->
+  <script id="tailwind-config">
+    try {
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "#131315",
+              primary: "#ffd165",
+              "primary-container": "#ffdf9a",
+              "on-primary": "#1b1b1e",
+              "on-surface": "#e5e1e4",
+              "on-surface-variant": "#d3c5ac",
+              outline: "#9b8f79",
+              error: "#ffb4ab",
+              "surface-container-lowest": "#0e0e10",
+              "surface-container-low": "#1c1b1d",
+              "surface-container": "#201f22",
+              "surface-container-high": "#2a2a2c",
+              "surface-container-highest": "#353437",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              label: ["'Hanken Grotesk'", "sans-serif"],
+            }
+          },
+        },
+      }
+    } catch (_e) {}
+  </script>
+
+  <!-- Custom Styles for Effects & Animations -->
+  <style>
+    /* Subtle Grid Overlay */
+    .grid-overlay {
+      background-image: 
+        linear-gradient(rgba(255, 209, 101, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 209, 101, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: center;
+    }
+    
+    /* Yellow Gradient Glows */
+    .yellow-gradient {
+      background: 
+        radial-gradient(circle at 80% 20%, rgba(255, 209, 101, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 10% 80%, rgba(255, 209, 101, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 209, 101, 0.02) 0%, transparent 70%);
+    }
+
+    /* Glassmorphism Panels */
+    .glass-panel {
+      background: rgba(20, 20, 22, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    /* Glowing Yellow Border/Shadow Effect */
+    .glow-yellow {
+      box-shadow: 0 0 45px -10px rgba(255, 209, 101, 0.15);
+      border: 1px solid rgba(255, 209, 101, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-sans h-screen flex flex-col items-center justify-center relative select-none overflow-hidden">
+
+  <!-- Grid & Ambient Glow Overlays -->
+  <div class="fixed inset-0 grid-overlay pointer-events-none z-0"></div>
+  <div class="fixed inset-0 yellow-gradient pointer-events-none z-0"></div>
+
+  <!-- Main Login Card Container -->
+  <main class="w-full max-w-md p-6 relative z-10">
+    <div class="glass-panel glow-yellow rounded-[2.5rem] p-8 md:p-10 flex flex-col gap-6">
+      
+      <!-- Brand Logotype & Title -->
+      <div class="flex flex-col items-center gap-3 text-center">
+        <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
+          <span class="material-symbols-outlined text-on-primary text-3xl font-bold" style="font-variation-settings: 'FILL' 1;">shield</span>
+        </div>
+        <div>
+          <h1 class="text-2xl font-black tracking-tight text-on-surface font-sans mt-2">
+            Vigilance <span class="text-primary font-black uppercase text-sm tracking-wider">AI</span>
+          </h1>
+          <p class="text-xs text-outline font-label mt-1">Biometric Surveillance Admin Portal</p>
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="space-y-5 font-label" onsubmit="handleLogin(event)">
+        
+        <!-- Username/Email -->
+        <div class="flex flex-col gap-2">
+          <label for="username" class="text-[10px] font-bold text-outline uppercase tracking-wider">Administrator Username</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">person</span>
+            <input type="text" id="username" required placeholder="e.g. admin" class="w-full pl-11 pr-4 py-3 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface placeholder-outline/50 focus:outline-none focus:border-primary/45 transition-colors">
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="flex flex-col gap-2">
+          <label for="password" class="text-[10px] font-bold text-outline uppercase tracking-wider">Portal Password</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">lock</span>
+            <input type="password" id="password" required placeholder="e.g. admin" class="w-full pl-11 pr-4 py-3 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface placeholder-outline/50 focus:outline-none focus:border-primary/45 transition-colors">
+          </div>
+        </div>
+
+        <!-- Sign In Button -->
+        <button type="submit" id="btn-sign-in" class="w-full py-3.5 mt-2 bg-primary text-on-primary font-black uppercase tracking-wider text-[10px] rounded-xl hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/5 active:scale-[0.98]">
+          <span class="material-symbols-outlined text-base">login</span>
+          Initialize Admin Session
+        </button>
+
+      </form>
+
+      <!-- Credentials Helper Badge -->
+      <div class="bg-surface-container-high/30 border border-white/5 rounded-2xl p-4 font-label mt-2">
+        <h4 class="text-[9px] font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm">info</span>
+          Authorized Admin Account
+        </h4>
+        <div class="grid grid-cols-2 gap-2 text-[9px] text-outline mt-2">
+          <div>Username: <span class="text-on-surface font-bold font-sans">admin</span></div>
+          <div>Password: <span class="text-on-surface font-bold font-sans">admin</span></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="absolute bottom-6 font-label z-10">
+    <span class="text-[9px] font-extrabold text-outline uppercase tracking-widest opacity-40">
+      v2.4.0 BuildHub Secure Authentication
+    </span>
+  </footer>
+
+  <!-- Notification Toast container -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 glass-panel border border-primary/25 rounded-2xl px-5 py-3.5 flex items-center gap-3 shadow-lg shadow-primary/5 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+    <span class="material-symbols-outlined text-primary text-xl" id="toast-icon">info</span>
+    <div class="font-label text-xs">
+      <p class="font-bold text-on-surface" id="toast-title">Toast Title</p>
+      <p class="text-outline text-[10px] mt-0.5" id="toast-desc">Toast details.</p>
+    </div>
+  </div>
+
+  <!-- Login Logic Script -->
+  <script>
+    // Toast alerts helper
+    function showToast(title, desc, icon = "info") {
+      const toast = document.getElementById('toast');
+      const toastTitle = document.getElementById('toast-title');
+      const toastDesc = document.getElementById('toast-desc');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastTitle.textContent = title;
+      toastDesc.textContent = desc;
+      toastIcon.textContent = icon;
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      }, 3500);
+    }
+
+    // Handles form login submission
+    function handleLogin(event) {
+      event.preventDefault();
+      
+      const userField = document.getElementById('username').value.trim();
+      const passField = document.getElementById('password').value;
+      const signInBtn = document.getElementById('btn-sign-in');
+
+      // Verification validation checks
+      if (userField === 'admin' && passField === 'admin') {
+        // Correct admin credentials
+        signInBtn.disabled = true;
+        signInBtn.classList.add('opacity-50', 'pointer-events-none');
+        signInBtn.innerHTML = `
+          <span class="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
+          Authenticating...
+        `;
+
+        // Store Session in client cache
+        localStorage.setItem('vigilance_logged_in', 'true');
+        localStorage.setItem('vigilance_current_user', JSON.stringify({
+          name: 'Admin User',
+          role: 'System Admin',
+          email: 'admin@vigilance.ai'
+        }));
+
+        showToast("Access Granted", "Security signatures verified. Loading telemetry core...", "verified_user");
+
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1200);
+      } else {
+        // Wrong credentials
+        showToast("Authorization Anomaly", "Incorrect credentials signature. Authentication rejected.", "security", "error");
+        
+        // Brief shaking effect on form fields
+        const loginForm = document.getElementById('login-form');
+        loginForm.classList.add('animate-bounce');
+        setTimeout(() => loginForm.classList.remove('animate-bounce'), 800);
+      }
+    }
+
+    // Redirect to dashboard if session is already active
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('vigilance_logged_in') === 'true') {
+        window.location.href = 'dashboard.html';
+      }
+    });
+
+    // Tactile button animations
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('mousedown', () => {
+        btn.classList.add('scale-[0.97]');
+      });
+      btn.addEventListener('mouseup', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+    });
+  </script>
+</body>
+</html>

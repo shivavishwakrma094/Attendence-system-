@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <!-- Session Security Guard -->
+  <script>
+    if (localStorage.getItem('vigilance_logged_in') !== 'true') {
+      window.location.replace('login.html');
+    }
+  </script>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Vigilance AI - System Settings</title>
+  <meta name="description" content="Vigilance AI biometric monitoring configuration and settings suite, powered by BuildHub.">
+  
+  <!-- Typography & Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Custom Tailwind Theme Definition -->
+  <script id="tailwind-config">
+    try {
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "#131315",
+              primary: "#ffd165",
+              "primary-container": "#ffdf9a",
+              "on-primary": "#1b1b1e",
+              "on-surface": "#e5e1e4",
+              "on-surface-variant": "#d3c5ac",
+              outline: "#9b8f79",
+              error: "#ffb4ab",
+              "surface-container-lowest": "#0e0e10",
+              "surface-container-low": "#1c1b1d",
+              "surface-container": "#201f22",
+              "surface-container-high": "#2a2a2c",
+              "surface-container-highest": "#353437",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              label: ["'Hanken Grotesk'", "sans-serif"],
+            }
+          },
+        },
+      }
+    } catch (_e) {}
+  </script>
+
+  <!-- Custom Styles for Effects & Animations -->
+  <style>
+    /* Subtle Grid Overlay */
+    .grid-overlay {
+      background-image: 
+        linear-gradient(rgba(255, 209, 101, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 209, 101, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: center;
+    }
+    
+    /* Yellow Gradient Glows */
+    .yellow-gradient {
+      background: 
+        radial-gradient(circle at 80% 20%, rgba(255, 209, 101, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 10% 80%, rgba(255, 209, 101, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 209, 101, 0.02) 0%, transparent 70%);
+    }
+
+    /* Glassmorphism Panels */
+    .glass-panel {
+      background: rgba(20, 20, 22, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    /* Glowing Yellow Border/Shadow Effect */
+    .glow-yellow {
+      box-shadow: 0 0 45px -10px rgba(255, 209, 101, 0.15);
+      border: 1px solid rgba(255, 209, 101, 0.15);
+    }
+
+    /* Hide default scrollbars */
+    .scroll-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scroll-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    /* Pulsing badge animation */
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; box-shadow: 0 0 8px rgba(255, 209, 101, 0.4); }
+      50% { opacity: 1; box-shadow: 0 0 18px rgba(255, 209, 101, 0.8); }
+    }
+    .pulse-badge {
+      animation: pulse-glow 2.5s infinite;
+    }
+
+    /* Custom Checkbox toggle switch styling */
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #ffd165;
+    }
+    .toggle-checkbox:checked + .toggle-label {
+      background-color: #ffd165;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-sans overflow-hidden h-screen flex flex-col relative select-none">
+
+  <!-- Grid & Ambient Glow Overlays -->
+  <div class="fixed inset-0 grid-overlay pointer-events-none z-0"></div>
+  <div class="fixed inset-0 yellow-gradient pointer-events-none z-0"></div>
+
+  <!-- Sticky backdrop-blurred top header -->
+  <header class="bg-surface-container-lowest/40 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5 w-full">
+    <div class="flex justify-between items-center px-6 py-4 w-full">
+      
+      <!-- Brand Logotype (Clickable) -->
+      <a href="dashboard.html" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+          <span class="material-symbols-outlined text-on-primary text-xl font-bold" style="font-variation-settings: 'FILL' 1;">shield</span>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight text-on-surface flex items-center gap-1 font-label">
+          Vigilance <span class="text-primary font-black uppercase text-sm tracking-wider font-sans">AI</span>
+        </h1>
+      </a>
+
+      <!-- Navigation links -->
+      <nav class="hidden md:flex items-center gap-8 font-label">
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="dashboard.html" id="nav-dashboard">Dashboard</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="livefeed.html" id="nav-livefeed">Live Feed</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="analytics.html" id="nav-analytics">Analytics</a>
+        <a class="text-primary font-extrabold border-b-2 border-primary pb-1 text-xs tracking-wider uppercase" href="settings.html" id="nav-settings">Settings</a>
+      </nav>
+
+      <!-- User controls -->
+      <div class="flex items-center gap-4 pl-6 border-l border-white/10 font-label relative">
+        <div class="text-right hidden sm:block">
+          <p id="header-user-name" class="text-xs font-black text-on-surface">Admin User</p>
+          <p id="header-user-role" class="text-[9px] text-primary/70 font-bold uppercase tracking-widest">System Admin</p>
+        </div>
+        <div onclick="toggleProfileDropdown()" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center border border-white/10 cursor-pointer hover:border-primary/45 transition-colors">
+          <span class="material-symbols-outlined text-primary text-lg">person</span>
+        </div>
+        
+        <!-- Profile Dropdown Menu -->
+        <div id="profile-dropdown" class="absolute right-0 top-12 w-56 glass-panel border border-white/10 rounded-2xl p-4 shadow-xl z-50 flex flex-col gap-3 font-label hidden">
+          <div class="border-b border-white/5 pb-2">
+            <p id="dropdown-user-name" class="text-xs font-black text-on-surface">Admin User</p>
+            <p id="dropdown-user-email" class="text-[9px] text-outline mt-0.5">admin@vigilance.ai</p>
+            <p id="dropdown-user-role" class="text-[8px] text-primary font-black uppercase tracking-wider mt-1">System Admin</p>
+          </div>
+          <button type="button" onclick="handleLogout()" class="w-full py-2 bg-error/10 hover:bg-error/20 text-error border border-error/20 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
+            <span class="material-symbols-outlined text-sm">logout</span>
+            Sign Out Session
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Core Page Body (Main Area) -->
+  <div class="flex flex-1 overflow-hidden relative z-10 w-full">
+    
+    <!-- Left Sidebar: Vigilance System -->
+    <aside class="hidden md:flex flex-col h-full w-60 bg-surface-container-lowest/30 backdrop-blur-2xl border-r border-white/5 font-label">
+      <div class="flex flex-col h-full justify-between py-6">
+        
+        <div class="space-y-8">
+          <!-- Top Info Badge -->
+          <div class="px-6 flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-xl">analytics</span>
+            </div>
+            <div>
+              <h2 class="font-extrabold text-on-surface uppercase tracking-widest text-[9px]">Vigilance System</h2>
+              <p class="text-[10px] text-primary font-black uppercase tracking-wider" id="sidebar-online-status">Online • Monitoring</p>
+            </div>
+          </div>
+
+          <!-- Nav Menu -->
+          <nav class="space-y-1.5 px-3">
+            <a href="dashboard.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">dashboard</span>
+              <span>Dashboard Overview</span>
+            </a>
+
+            <a href="registration.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg" data-original-icon="person_add">person_add</span>
+              <span>Registration</span>
+            </a>
+            
+            <a href="livefeed.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;" data-original-icon="center_focus_strong">center_focus_strong</span>
+              <span>Live Feed</span>
+            </a>
+            
+            <a href="analytics.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">analytics</span>
+              <span>Analytics Insights</span>
+            </a>
+
+            <a href="export.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">description</span>
+              <span>Export Telemetry</span>
+            </a>
+            
+            <a href="settings.html" class="bg-primary text-on-primary flex items-center gap-3.5 px-4 py-3 rounded-xl border border-primary/15 transition-all text-xs font-black uppercase tracking-wider shadow-lg shadow-primary/5">
+              <span class="material-symbols-outlined text-lg">settings</span>
+              <span>System Settings</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Sidebar footer / System stats -->
+        <div class="px-6 space-y-5">
+          <div class="bg-surface-container-high/40 p-4 rounded-2xl border border-white/5 backdrop-blur-md">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[9px] uppercase font-bold text-outline tracking-wider">Neural Load</span>
+              <span class="text-[9px] text-primary font-black uppercase tracking-wider">Optimal</span>
+            </div>
+            <div class="h-1.5 bg-surface-container-lowest rounded-full overflow-hidden">
+              <div class="h-full bg-primary w-[42%] shadow-[0_0_8px_rgba(255,209,101,0.4)]"></div>
+            </div>
+          </div>
+          <p class="text-[9px] text-outline font-black tracking-widest text-center opacity-40 uppercase">
+            v2.4.0 BuildHub Engine
+          </p>
+        </div>
+        
+      </div>
+    </aside>
+
+    <!-- Main View: Settings Workspace -->
+    <main class="flex-1 flex flex-col p-6 overflow-hidden relative">
+      <div class="flex flex-col gap-6 h-full overflow-y-auto scroll-hide">
+        
+        <!-- Welcome banner -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-on-surface tracking-tight font-sans">System Settings & Configuration</h2>
+            <p class="text-xs text-outline font-label mt-1">Configure neural engine weights, physical linked sensors, and system policy rosters.</p>
+          </div>
+          <div class="flex items-center gap-2.5 font-label">
+            <span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(255,209,101,0.8)]"></span>
+            <span class="text-[10px] text-primary font-black uppercase tracking-wider">Config Synchronization Active</span>
+          </div>
+        </div>
+
+        <!-- Settings Container Panels -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start flex-1">
+          
+          <!-- Category Selector Tabs (Column 1) -->
+          <div class="lg:col-span-1 glass-panel rounded-2xl p-4 border border-white/5 flex flex-col gap-2 font-label">
+            <h3 class="text-[9px] font-black uppercase text-outline tracking-wider mb-2 px-3">Configuration Groups</h3>
+            
+            <button type="button" onclick="switchTab('ai-engine')" id="tab-btn-ai-engine" class="w-full text-left flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all text-xs font-black uppercase tracking-wider bg-primary text-on-primary shadow-lg shadow-primary/5">
+              <span class="material-symbols-outlined text-lg">psychology</span>
+              <span>AI Neural Engine</span>
+            </button>
+            
+            <button type="button" onclick="switchTab('camera-matrix')" id="tab-btn-camera-matrix" class="w-full text-left flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5">
+              <span class="material-symbols-outlined text-lg">videocam</span>
+              <span>Camera Matrix</span>
+            </button>
+            
+            <button type="button" onclick="switchTab('rules-policies')" id="tab-btn-rules-policies" class="w-full text-left flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5">
+              <span class="material-symbols-outlined text-lg">gavel</span>
+              <span>Attendance Rules</span>
+            </button>
+            
+            <button type="button" onclick="switchTab('notifications')" id="tab-btn-notifications" class="w-full text-left flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5">
+              <span class="material-symbols-outlined text-lg">notifications_active</span>
+              <span>Alert Notifications</span>
+            </button>
+            
+            <button type="button" onclick="switchTab('database-cache')" id="tab-btn-database-cache" class="w-full text-left flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5 border-t border-white/5 pt-5 mt-2">
+              <span class="material-symbols-outlined text-lg">database</span>
+              <span>System & Storage</span>
+            </button>
+          </div>
+
+          <!-- Configuration Panel Form (Columns 2-4) -->
+          <div class="lg:col-span-3 glass-panel rounded-2xl p-6 border border-white/5 flex flex-col gap-6">
+            
+            <form id="settings-form" class="space-y-6" onsubmit="event.preventDefault();">
+              
+              <!-- Tab 1: AI Neural Engine -->
+              <div id="pane-ai-engine" class="settings-pane space-y-6">
+                <div class="border-b border-white/5 pb-4">
+                  <h3 class="text-sm font-bold text-on-surface font-sans">AI Neural Network Settings</h3>
+                  <p class="text-[10px] text-outline font-label mt-0.5">Control recognition matching sensitivity margins and computation variants.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 font-label">
+                  <!-- AI Model Variant Selection -->
+                  <div class="flex flex-col gap-2">
+                    <label for="ai-model" class="text-[10px] font-bold text-outline uppercase tracking-wider">Neural Classifier Engine</label>
+                    <select id="ai-model" class="px-4 py-3 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary/45 transition-colors">
+                      <option value="BuildHub Neural v3.2">BuildHub Neural v3.2 [High Precision]</option>
+                      <option value="BuildHub Light v1.1">BuildHub Light v1.1 [Fast Inference]</option>
+                      <option value="MobileNET Edge v2.0">MobileNET Edge v2.0 [Low Power Client]</option>
+                    </select>
+                  </div>
+                  
+                  <!-- Scan Sampling Frequency -->
+                  <div class="flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-outline uppercase tracking-wider">
+                      <span>Recognition Sampling Rate</span>
+                      <span id="scan-rate-val" class="text-primary font-black">5.0s</span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-1">
+                      <input type="range" id="scan-rate" min="1.0" max="10.0" step="0.5" class="flex-1 accent-primary bg-surface-container-low h-1 rounded-lg cursor-pointer">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Match Confidence Level (Slider) -->
+                <div class="flex flex-col gap-2 font-label sm:w-1/2">
+                  <div class="flex justify-between items-center text-[10px] font-bold text-outline uppercase tracking-wider">
+                    <span>Confidence Threshold Margin</span>
+                    <span id="confidence-val" class="text-primary font-black">98.4%</span>
+                  </div>
+                  <input type="range" id="confidence-threshold" min="80.0" max="99.0" step="0.1" class="w-full accent-primary bg-surface-container-low h-1 rounded-lg cursor-pointer mt-1">
+                  <p class="text-[9px] text-outline mt-1 font-medium">Matches below this value will flag as security anomalies.</p>
+                </div>
+
+                <div class="pt-4 border-t border-white/5 flex justify-end">
+                  <button type="button" onclick="saveSettings('AI Neural settings saved successfully')" class="px-6 py-3 bg-primary text-on-primary font-black uppercase tracking-wider text-[10px] rounded-xl hover:bg-primary-container transition-all flex items-center gap-2 shadow-lg shadow-primary/5 active:scale-[0.98]">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    Save AI Settings
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tab 2: Camera Matrix Configuration -->
+              <div id="pane-camera-matrix" class="settings-pane space-y-6 hidden">
+                <div class="border-b border-white/5 pb-4">
+                  <h3 class="text-sm font-bold text-on-surface font-sans">Surveillance Node Settings</h3>
+                  <p class="text-[10px] text-outline font-label mt-0.5">Control active feed endpoints, system status, and visual streams.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 font-label">
+                  <!-- System Status Dropdown -->
+                  <div class="flex flex-col gap-2">
+                    <label for="system-status" class="text-[10px] font-bold text-outline uppercase tracking-wider">Global System Status</label>
+                    <select id="system-status" class="px-4 py-3 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary/45 transition-colors">
+                      <option value="Operational">Operational</option>
+                      <option value="Maintenance Mode">Maintenance Mode</option>
+                      <option value="Shielded Lockdown">Shielded / Lockdown</option>
+                      <option value="Simulation Active">Simulation Active</option>
+                    </select>
+                  </div>
+
+                  <!-- Feed Quality Resolution -->
+                  <div class="flex flex-col gap-2">
+                    <label for="feed-quality" class="text-[10px] font-bold text-outline uppercase tracking-wider">Video Stream Quality</label>
+                    <select id="feed-quality" class="px-4 py-3 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary/45 transition-colors">
+                      <option value="1080p">1080p (FHD - High Bandwidth)</option>
+                      <option value="720p">720p (HD - Balanced)</option>
+                      <option value="480p">480p (SD - Low Memory)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Active Cameras Node Checklist -->
+                <div class="flex flex-col gap-3 font-label">
+                  <label class="text-[10px] font-bold text-outline uppercase tracking-wider">Linked Camera Sensors</label>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    
+                    <label class="flex items-center justify-between p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/10 rounded-xl cursor-pointer select-none">
+                      <span class="text-xs font-bold text-on-surface">Gate 1 Cam</span>
+                      <input type="checkbox" id="node-gate1" checked class="rounded text-primary focus:ring-primary/20 bg-surface-container-high border-white/10 w-4 h-4 cursor-pointer">
+                    </label>
+
+                    <label class="flex items-center justify-between p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/10 rounded-xl cursor-pointer select-none">
+                      <span class="text-xs font-bold text-on-surface">Main Hallway</span>
+                      <input type="checkbox" id="node-hallway" checked class="rounded text-primary focus:ring-primary/20 bg-surface-container-high border-white/10 w-4 h-4 cursor-pointer">
+                    </label>
+
+                    <label class="flex items-center justify-between p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/10 rounded-xl cursor-pointer select-none">
+                      <span class="text-xs font-bold text-on-surface">Lab A Terminal</span>
+                      <input type="checkbox" id="node-laba" checked class="rounded text-primary focus:ring-primary/20 bg-surface-container-high border-white/10 w-4 h-4 cursor-pointer">
+                    </label>
+
+                    <label class="flex items-center justify-between p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/10 rounded-xl cursor-pointer select-none">
+                      <span class="text-xs font-bold text-on-surface">Class 101 Cam</span>
+                      <input type="checkbox" id="node-class101" checked class="rounded text-primary focus:ring-primary/20 bg-surface-container-high border-white/10 w-4 h-4 cursor-pointer">
+                    </label>
+
+                    <label class="flex items-center justify-between p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/10 rounded-xl cursor-pointer select-none">
+                      <span class="text-xs font-bold text-on-surface">Library Entrance</span>
+                      <input type="checkbox" id="node-library" checked class="rounded text-primary focus:ring-primary/20 bg-surface-container-high border-white/10 w-4 h-4 cursor-pointer">
+                    </label>
+
+                    <label class="flex items-center justify-between p-3.5 bg-surface-container-high/30 border border-white/5 hover:border-primary/10 rounded-xl cursor-pointer select-none">
+                      <span class="text-xs font-bold text-on-surface">Parking Entrance</span>
+                      <input type="checkbox" id="node-parking" checked class="rounded text-primary focus:ring-primary/20 bg-surface-container-high border-white/10 w-4 h-4 cursor-pointer">
+                    </label>
+
+                  </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/5 flex justify-end">
+                  <button type="button" onclick="saveSettings('Camera Matrix saved successfully')" class="px-6 py-3 bg-primary text-on-primary font-black uppercase tracking-wider text-[10px] rounded-xl hover:bg-primary-container transition-all flex items-center gap-2 shadow-lg shadow-primary/5 active:scale-[0.98]">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    Save Node Matrix
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tab 3: Attendance Rules & Policies -->
+              <div id="pane-rules-policies" class="settings-pane space-y-6 hidden">
+                <div class="border-b border-white/5 pb-4">
+                  <h3 class="text-sm font-bold text-on-surface font-sans">Attendance Policy Settings</h3>
+                  <p class="text-[10px] text-outline font-label mt-0.5">Control threshold timers for student late/absent verification logs.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 font-label">
+                  <!-- Late Threshold (Minutes) -->
+                  <div class="flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-outline uppercase tracking-wider">
+                      <span>Late Status Threshold</span>
+                      <span id="late-val" class="text-primary font-black">15 mins</span>
+                    </div>
+                    <input type="range" id="late-threshold" min="5" max="30" step="1" class="w-full accent-primary bg-surface-container-low h-1 rounded-lg cursor-pointer mt-1">
+                    <p class="text-[8px] text-outline mt-1 font-medium">Scans past this minute range mark as "Late".</p>
+                  </div>
+
+                  <!-- Absent Threshold (Minutes) -->
+                  <div class="flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-outline uppercase tracking-wider">
+                      <span>Absent Status Threshold</span>
+                      <span id="absent-val" class="text-primary font-black">30 mins</span>
+                    </div>
+                    <input type="range" id="absent-threshold" min="15" max="90" step="5" class="w-full accent-primary bg-surface-container-low h-1 rounded-lg cursor-pointer mt-1">
+                    <p class="text-[8px] text-outline mt-1 font-medium">Scans past this minute range mark as "Absent".</p>
+                  </div>
+                </div>
+
+                <!-- Database Sync Toggle -->
+                <div class="flex items-center justify-between p-4 bg-surface-container-high/30 border border-white/5 rounded-xl font-label sm:w-1/2">
+                  <div>
+                    <h4 class="text-xs font-bold text-on-surface">Roster Cloud Database Sync</h4>
+                    <p class="text-[9px] text-outline mt-0.5 font-medium">Sync rosters to cloud endpoint in real time.</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="db-sync" class="sr-only peer" checked>
+                    <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:bg-on-primary peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+
+                <div class="pt-4 border-t border-white/5 flex justify-end">
+                  <button type="button" onclick="saveSettings('Attendance policies updated')" class="px-6 py-3 bg-primary text-on-primary font-black uppercase tracking-wider text-[10px] rounded-xl hover:bg-primary-container transition-all flex items-center gap-2 shadow-lg shadow-primary/5 active:scale-[0.98]">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    Save Policy Rules
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tab 4: Alert Notifications -->
+              <div id="pane-notifications" class="settings-pane space-y-6 hidden">
+                <div class="border-b border-white/5 pb-4">
+                  <h3 class="text-sm font-bold text-on-surface font-sans">System Alerts & Notifications</h3>
+                  <p class="text-[10px] text-outline font-label mt-0.5">Control notification email triggers and sound telemetry controls.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 font-label">
+                  <!-- Email Alert Toggles -->
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-surface-container-high/30 border border-white/5 rounded-xl">
+                      <div>
+                        <h4 class="text-xs font-bold text-on-surface">Email Security Alerts</h4>
+                        <p class="text-[9px] text-outline mt-0.5 font-medium">Trigger alerts on face anomaly/threat.</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="email-alerts" class="sr-only peer" checked>
+                        <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:bg-on-primary peer-checked:bg-primary"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex flex-col gap-2" id="alert-email-container">
+                      <label for="alert-email" class="text-[10px] font-bold text-outline uppercase tracking-wider">Alert Recipient Email</label>
+                      <input type="email" id="alert-email" placeholder="e.g. security@vigilance.ai" class="px-4 py-3 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface placeholder-outline/50 focus:outline-none focus:border-primary/45 transition-colors">
+                    </div>
+                  </div>
+
+                  <!-- Volume & Log Retention -->
+                  <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                      <div class="flex justify-between items-center text-[10px] font-bold text-outline uppercase tracking-wider">
+                        <span>Audio Alarm Volume</span>
+                        <span id="volume-val" class="text-primary font-black">70%</span>
+                      </div>
+                      <input type="range" id="alert-volume" min="0" max="100" step="5" class="w-full accent-primary bg-surface-container-low h-1 rounded-lg cursor-pointer mt-1">
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                      <label for="log-retention" class="text-[10px] font-bold text-outline uppercase tracking-wider">Logs Retention Period</label>
+                      <select id="log-retention" class="px-4 py-3 bg-surface-container-high/40 border border-white/5 rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary/45 transition-colors">
+                        <option value="7">7 Days Cache</option>
+                        <option value="30">30 Days Cache</option>
+                        <option value="90">90 Days Cache</option>
+                        <option value="forever">Indefinite Retention</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/5 flex justify-end">
+                  <button type="button" onclick="saveSettings('Notification preferences updated')" class="px-6 py-3 bg-primary text-on-primary font-black uppercase tracking-wider text-[10px] rounded-xl hover:bg-primary-container transition-all flex items-center gap-2 shadow-lg shadow-primary/5 active:scale-[0.98]">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    Save Notifications
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tab 5: System Database & Backup -->
+              <div id="pane-database-cache" class="settings-pane space-y-6 hidden">
+                <div class="border-b border-white/5 pb-4">
+                  <h3 class="text-sm font-bold text-on-surface font-sans">Database & Storage Management</h3>
+                  <p class="text-[10px] text-outline font-label mt-0.5">Control backup imports/exports and reset cache tables.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 font-label">
+                  <!-- Storage Space Indicator -->
+                  <div class="bg-surface-container-high/30 p-5 rounded-2xl border border-white/5 flex flex-col justify-between">
+                    <div>
+                      <h4 class="text-xs font-black uppercase tracking-wider text-outline">Cluster Telemetry Storage</h4>
+                      <p class="text-2xl font-black text-on-surface mt-2">24.8 KB</p>
+                      <p class="text-[10px] text-primary mt-1 font-bold">45 face biometric models cached</p>
+                    </div>
+                    <div class="h-1.5 bg-surface-container-lowest rounded-full overflow-hidden mt-4">
+                      <div class="h-full bg-primary w-[8%]"></div>
+                    </div>
+                  </div>
+
+                  <!-- System Actions Panel -->
+                  <div class="space-y-4">
+                    <h4 class="text-[10px] font-bold text-outline uppercase tracking-wider">Backup Config Profile</h4>
+                    <div class="flex flex-wrap gap-3">
+                      <!-- Export Button -->
+                      <button type="button" onclick="exportConfig()" class="flex-1 min-w-[120px] py-3 bg-white/5 hover:bg-white/10 text-outline hover:text-on-surface border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5">
+                        <span class="material-symbols-outlined text-base text-primary">download</span>
+                        Export profile
+                      </button>
+                      
+                      <!-- Import Button File Input Trigger -->
+                      <label class="flex-1 min-w-[120px] py-3 bg-white/5 hover:bg-white/10 text-outline hover:text-on-surface border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center">
+                        <span class="material-symbols-outlined text-base text-primary">upload</span>
+                        Import profile
+                        <input type="file" id="import-config-file" onchange="importConfig(event)" class="hidden" accept=".json">
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dangerous Section -->
+                <div class="bg-error/5 border border-error/20 p-5 rounded-2xl space-y-4 font-label">
+                  <div>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-error flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-base">warning</span>
+                      Dangerous Maintenance Tools
+                    </h4>
+                    <p class="text-[9px] text-outline mt-1 font-semibold">Performing these commands wipes local configuration logs. Exercise absolute caution.</p>
+                  </div>
+                  <div class="flex flex-wrap gap-4 pt-2">
+                    <button type="button" onclick="clearCachedData()" class="px-5 py-3 border border-error/20 bg-error/10 hover:bg-error/20 text-error rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
+                      <span class="material-symbols-outlined text-base">delete_sweep</span>
+                      Clear Database Roster Logs
+                    </button>
+                    <button type="button" onclick="resetToDefaults()" class="px-5 py-3 bg-white/5 hover:bg-white/10 text-outline border border-white/5 hover:border-outline/35 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
+                      <span class="material-symbols-outlined text-base">restart_alt</span>
+                      Reset Factory Configs
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="bg-surface-container-lowest/60 backdrop-blur-xl w-full border-t border-white/5 relative z-50 font-label">
+    <div class="flex flex-col md:flex-row justify-between items-center px-6 py-4 gap-3 w-full">
+      <div class="flex items-center gap-2">
+        <span class="text-[9px] font-extrabold text-outline uppercase tracking-wider">
+          © 2024 Vigilance AI Ecosystem. BuildHub Powered.
+        </span>
+      </div>
+      <div class="flex gap-6 items-center">
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors uppercase tracking-wider" href="#">Docs</a>
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors uppercase tracking-wider" href="#">Privacy</a>
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors flex items-center gap-2 uppercase tracking-wider" href="#">
+          <span id="footer-status-dot" class="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)]"></span>
+          Status: <span id="footer-status-text">Operational</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Notification Toast container -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 glass-panel border border-primary/25 rounded-2xl px-5 py-3.5 flex items-center gap-3 shadow-lg shadow-primary/5 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+    <span class="material-symbols-outlined text-primary text-xl" id="toast-icon">info</span>
+    <div class="font-label text-xs">
+      <p class="font-bold text-on-surface" id="toast-title">Toast Title</p>
+      <p class="text-outline text-[10px] mt-0.5" id="toast-desc">Toast details.</p>
+    </div>
+  </div>
+
+  <!-- JavaScript Page Logic -->
+  <script>
+    // Tab switching controls
+    function switchTab(tabId) {
+      // Hide all panels
+      document.querySelectorAll('.settings-pane').forEach(pane => pane.classList.add('hidden'));
+      // Show target panel
+      document.getElementById(`pane-${tabId}`).classList.remove('hidden');
+
+      // Update button visual styles
+      document.querySelectorAll('[id^="tab-btn-"]').forEach(btn => {
+        btn.className = "w-full text-left flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5";
+      });
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      activeBtn.className = "w-full text-left flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all text-xs font-black uppercase tracking-wider bg-primary text-on-primary shadow-lg shadow-primary/5";
+    }
+
+    // Interactive slider label updates
+    const confidenceSlider = document.getElementById('confidence-threshold');
+    const confidenceLabel = document.getElementById('confidence-val');
+    confidenceSlider.addEventListener('input', () => {
+      confidenceLabel.textContent = `${parseFloat(confidenceSlider.value).toFixed(1)}%`;
+    });
+
+    const rateSlider = document.getElementById('scan-rate');
+    const rateLabel = document.getElementById('scan-rate-val');
+    rateSlider.addEventListener('input', () => {
+      rateLabel.textContent = `${parseFloat(rateSlider.value).toFixed(1)}s`;
+    });
+
+    const volumeSlider = document.getElementById('alert-volume');
+    const volumeLabel = document.getElementById('volume-val');
+    volumeSlider.addEventListener('input', () => {
+      volumeLabel.textContent = `${volumeSlider.value}%`;
+    });
+
+    const lateSlider = document.getElementById('late-threshold');
+    const lateLabel = document.getElementById('late-val');
+    lateSlider.addEventListener('input', () => {
+      lateLabel.textContent = `${lateSlider.value} mins`;
+    });
+
+    const absentSlider = document.getElementById('absent-threshold');
+    const absentLabel = document.getElementById('absent-val');
+    absentSlider.addEventListener('input', () => {
+      absentLabel.textContent = `${absentSlider.value} mins`;
+    });
+
+    // Alert email visibility toggle helper
+    const emailAlertToggle = document.getElementById('email-alerts');
+    const emailContainer = document.getElementById('alert-email-container');
+    emailAlertToggle.addEventListener('change', () => {
+      if (emailAlertToggle.checked) {
+        emailContainer.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        emailContainer.classList.add('opacity-40', 'pointer-events-none');
+      }
+    });
+
+    // Load configurations from LocalStorage
+    function loadConfig() {
+      // AI Neural settings
+      document.getElementById('ai-model').value = localStorage.getItem('vigilance_ai_model') || 'BuildHub Neural v3.2';
+      
+      const thresholdVal = localStorage.getItem('vigilance_confidence_threshold') || '98.4';
+      confidenceSlider.value = thresholdVal;
+      confidenceLabel.textContent = `${parseFloat(thresholdVal).toFixed(1)}%`;
+      
+      const samplingVal = localStorage.getItem('vigilance_scan_interval') || '5.0';
+      rateSlider.value = samplingVal;
+      rateLabel.textContent = `${parseFloat(samplingVal).toFixed(1)}s`;
+
+      // Camera Matrix settings
+      const systemStatus = localStorage.getItem('vigilance_system_status') || 'Operational';
+      document.getElementById('system-status').value = systemStatus;
+      document.getElementById('feed-quality').value = localStorage.getItem('vigilance_video_quality') || '1080p';
+
+      const nodes = JSON.parse(localStorage.getItem('vigilance_active_nodes')) || [
+        'Gate 1 Cam', 'Main Hallway', 'Lab A Terminal', 'Class 101 Cam', 'Library Entrance', 'Parking Entrance'
+      ];
+      document.getElementById('node-gate1').checked = nodes.includes('Gate 1 Cam');
+      document.getElementById('node-hallway').checked = nodes.includes('Main Hallway');
+      document.getElementById('node-laba').checked = nodes.includes('Lab A Terminal');
+      document.getElementById('node-class101').checked = nodes.includes('Class 101 Cam');
+      document.getElementById('node-library').checked = nodes.includes('Library Entrance');
+      document.getElementById('node-parking').checked = nodes.includes('Parking Entrance');
+
+      // Rules & policies
+      const lateVal = localStorage.getItem('vigilance_late_threshold') || '15';
+      lateSlider.value = lateVal;
+      lateLabel.textContent = `${lateVal} mins`;
+
+      const absentVal = localStorage.getItem('vigilance_absent_threshold') || '30';
+      absentSlider.value = absentVal;
+      absentLabel.textContent = `${absentVal} mins`;
+
+      document.getElementById('db-sync').checked = localStorage.getItem('vigilance_db_sync') !== 'false';
+
+      // Notifications
+      const isEmailOn = localStorage.getItem('vigilance_email_alerts') !== 'false';
+      emailAlertToggle.checked = isEmailOn;
+      if (isEmailOn) {
+        emailContainer.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        emailContainer.classList.add('opacity-40', 'pointer-events-none');
+      }
+
+      document.getElementById('alert-email').value = localStorage.getItem('vigilance_alert_email') || 'security@vigilance.ai';
+      
+      const volVal = localStorage.getItem('vigilance_alert_volume') || '70';
+      volumeSlider.value = volVal;
+      volumeLabel.textContent = `${volVal}%`;
+
+      document.getElementById('log-retention').value = localStorage.getItem('vigilance_log_retention') || '30';
+
+      // Update footers and sidebar
+      updateSystemFooter(systemStatus);
+    }
+
+    // Save configurations to LocalStorage
+    function saveSettings(successMessage) {
+      // AI Settings
+      localStorage.setItem('vigilance_ai_model', document.getElementById('ai-model').value);
+      localStorage.setItem('vigilance_confidence_threshold', confidenceSlider.value);
+      localStorage.setItem('vigilance_scan_interval', rateSlider.value);
+
+      // Camera matrix
+      const statusMode = document.getElementById('system-status').value;
+      localStorage.setItem('vigilance_system_status', statusMode);
+      localStorage.setItem('vigilance_video_quality', document.getElementById('feed-quality').value);
+
+      const activeNodes = [];
+      if (document.getElementById('node-gate1').checked) activeNodes.push('Gate 1 Cam');
+      if (document.getElementById('node-hallway').checked) activeNodes.push('Main Hallway');
+      if (document.getElementById('node-laba').checked) activeNodes.push('Lab A Terminal');
+      if (document.getElementById('node-class101').checked) activeNodes.push('Class 101 Cam');
+      if (document.getElementById('node-library').checked) activeNodes.push('Library Entrance');
+      if (document.getElementById('node-parking').checked) activeNodes.push('Parking Entrance');
+      localStorage.setItem('vigilance_active_nodes', JSON.stringify(activeNodes));
+
+      // Rules & Policies
+      localStorage.setItem('vigilance_late_threshold', lateSlider.value);
+      localStorage.setItem('vigilance_absent_threshold', absentSlider.value);
+      localStorage.setItem('vigilance_db_sync', document.getElementById('db-sync').checked);
+
+      // Notifications
+      localStorage.setItem('vigilance_email_alerts', emailAlertToggle.checked);
+      localStorage.setItem('vigilance_alert_email', document.getElementById('alert-email').value);
+      localStorage.setItem('vigilance_alert_volume', volumeSlider.value);
+      localStorage.setItem('vigilance_log_retention', document.getElementById('log-retention').value);
+
+      // Footer
+      updateSystemFooter(statusMode);
+
+      // Success feedback toast
+      showToast("Config Synchronized", successMessage || "Settings saved to client storage.", "check_circle");
+    }
+
+    // Sync status in UI
+    function updateSystemFooter(status) {
+      const textEl = document.getElementById('footer-status-text');
+      const dotEl = document.getElementById('footer-status-dot');
+      const sidebarStatus = document.getElementById('sidebar-online-status');
+
+      textEl.textContent = status;
+      if (status === 'Operational') {
+        dotEl.className = "w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)]";
+        sidebarStatus.innerHTML = "Online • Monitoring";
+        sidebarStatus.className = "text-[10px] text-primary font-black uppercase tracking-wider";
+      } else if (status === 'Maintenance Mode') {
+        dotEl.className = "w-1.5 h-1.5 bg-outline rounded-full shadow-[0_0_6px_rgba(155,143,121,0.8)]";
+        sidebarStatus.innerHTML = "System Maintenance";
+        sidebarStatus.className = "text-[10px] text-outline font-black uppercase tracking-wider";
+      } else if (status === 'Shielded Lockdown') {
+        dotEl.className = "w-1.5 h-1.5 bg-error rounded-full shadow-[0_0_6px_rgba(255,180,171,0.8)] animate-pulse";
+        sidebarStatus.innerHTML = "Node Lockdown Active";
+        sidebarStatus.className = "text-[10px] text-error font-black uppercase tracking-wider animate-pulse";
+      } else if (status === 'Simulation Active') {
+        dotEl.className = "w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)] animate-ping";
+        sidebarStatus.innerHTML = "Simulation Sandbox";
+        sidebarStatus.className = "text-[10px] text-primary font-black uppercase tracking-wider animate-pulse";
+      }
+    }
+
+    // Toast alert helper
+    function showToast(title, desc, icon = "info") {
+      const toast = document.getElementById('toast');
+      const toastTitle = document.getElementById('toast-title');
+      const toastDesc = document.getElementById('toast-desc');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastTitle.textContent = title;
+      toastDesc.textContent = desc;
+      toastIcon.textContent = icon;
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      }, 3500);
+    }
+
+    // Reset settings
+    function resetToDefaults() {
+      if (confirm("Are you sure you want to restore default configs? This action resets AI thresholds and rules.")) {
+        localStorage.removeItem('vigilance_ai_model');
+        localStorage.removeItem('vigilance_confidence_threshold');
+        localStorage.removeItem('vigilance_scan_interval');
+        localStorage.removeItem('vigilance_system_status');
+        localStorage.removeItem('vigilance_video_quality');
+        localStorage.removeItem('vigilance_active_nodes');
+        localStorage.removeItem('vigilance_late_threshold');
+        localStorage.removeItem('vigilance_absent_threshold');
+        localStorage.removeItem('vigilance_db_sync');
+        localStorage.removeItem('vigilance_email_alerts');
+        localStorage.removeItem('vigilance_alert_email');
+        localStorage.removeItem('vigilance_alert_volume');
+        localStorage.removeItem('vigilance_log_retention');
+
+        loadConfig();
+        showToast("Configs Restored", "Settings have been reset to factory defaults.", "restart_alt");
+      }
+    }
+
+    // Clear roster database caches
+    function clearCachedData() {
+      if (confirm("Dangerous Operation! Wiping attendance telemetry roster logs?")) {
+        // Mock data cleanup
+        showToast("Telemetry Database Cleared", "Verification matching logs and profiles have been pruned.", "delete_sweep");
+      }
+    }
+
+    // Export JSON Config profile
+    function exportConfig() {
+      const config = {
+        ai_model: localStorage.getItem('vigilance_ai_model') || 'BuildHub Neural v3.2',
+        confidence_threshold: localStorage.getItem('vigilance_confidence_threshold') || '98.4',
+        scan_interval: localStorage.getItem('vigilance_scan_interval') || '5.0',
+        system_status: localStorage.getItem('vigilance_system_status') || 'Operational',
+        video_quality: localStorage.getItem('vigilance_video_quality') || '1080p',
+        active_nodes: JSON.parse(localStorage.getItem('vigilance_active_nodes')) || [
+          'Gate 1 Cam', 'Main Hallway', 'Lab A Terminal', 'Class 101 Cam', 'Library Entrance', 'Parking Entrance'
+        ],
+        late_threshold: localStorage.getItem('vigilance_late_threshold') || '15',
+        absent_threshold: localStorage.getItem('vigilance_absent_threshold') || '30',
+        db_sync: localStorage.getItem('vigilance_db_sync') !== 'false',
+        email_alerts: localStorage.getItem('vigilance_email_alerts') !== 'false',
+        alert_email: localStorage.getItem('vigilance_alert_email') || 'security@vigilance.ai',
+        alert_volume: localStorage.getItem('vigilance_alert_volume') || '70',
+        log_retention: localStorage.getItem('vigilance_log_retention') || '30'
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "vigilance_config_profile.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      showToast("Config Exported", "Configuration profile JSON compiled and downloaded.", "download");
+    }
+
+    // Import JSON Config profile
+    function importConfig(event) {
+      const fileInput = event.target;
+      if (!fileInput.files.length) return;
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          const config = JSON.parse(e.target.result);
+          
+          if (config.ai_model) localStorage.setItem('vigilance_ai_model', config.ai_model);
+          if (config.confidence_threshold) localStorage.setItem('vigilance_confidence_threshold', config.confidence_threshold);
+          if (config.scan_interval) localStorage.setItem('vigilance_scan_interval', config.scan_interval);
+          if (config.system_status) localStorage.setItem('vigilance_system_status', config.system_status);
+          if (config.video_quality) localStorage.setItem('vigilance_video_quality', config.video_quality);
+          if (config.active_nodes) localStorage.setItem('vigilance_active_nodes', JSON.stringify(config.active_nodes));
+          if (config.late_threshold) localStorage.setItem('vigilance_late_threshold', config.late_threshold);
+          if (config.absent_threshold) localStorage.setItem('vigilance_absent_threshold', config.absent_threshold);
+          if (config.db_sync !== undefined) localStorage.setItem('vigilance_db_sync', config.db_sync);
+          if (config.email_alerts !== undefined) localStorage.setItem('vigilance_email_alerts', config.email_alerts);
+          if (config.alert_email) localStorage.setItem('vigilance_alert_email', config.alert_email);
+          if (config.alert_volume) localStorage.setItem('vigilance_alert_volume', config.alert_volume);
+          if (config.log_retention) localStorage.setItem('vigilance_log_retention', config.log_retention);
+
+          loadConfig();
+          showToast("Profile Imported", "Local storage configurations updated from config file.", "upload");
+        } catch (err) {
+          showToast("Import Failure", "Invalid config file structure. Please upload a valid JSON config profile.", "error");
+        }
+      };
+
+      reader.readAsText(file);
+      fileInput.value = ''; // Reset file input
+    }
+
+    // Initialize Settings Values on Load
+    window.addEventListener('load', () => {
+      loadConfig();
+      loadUserDetails();
+    });
+
+    // Toggle Profile Dropdown
+    function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profile-dropdown');
+      if (dropdown) dropdown.classList.toggle('hidden');
+    }
+
+    // Close dropdown on click outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('profile-dropdown');
+      const avatarBtn = dropdown ? dropdown.previousElementSibling : null;
+      if (dropdown && avatarBtn && !dropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // Handle logout action
+    function handleLogout() {
+      localStorage.removeItem('vigilance_logged_in');
+      localStorage.removeItem('vigilance_current_user');
+      window.location.replace('login.html');
+    }
+
+    // Dynamic user details load
+    function loadUserDetails() {
+      const user = JSON.parse(localStorage.getItem('vigilance_current_user') || '{"name":"Admin User","role":"System Admin","email":"admin@vigilance.ai"}');
+      
+      const headerName = document.getElementById('header-user-name');
+      const headerRole = document.getElementById('header-user-role');
+      const dropdownName = document.getElementById('dropdown-user-name');
+      const dropdownEmail = document.getElementById('dropdown-user-email');
+      const dropdownRole = document.getElementById('dropdown-user-role');
+
+      if (headerName) headerName.textContent = user.name;
+      if (headerRole) headerRole.textContent = user.role;
+      if (dropdownName) dropdownName.textContent = user.name;
+      if (dropdownEmail) dropdownEmail.textContent = user.email;
+      if (dropdownRole) dropdownRole.textContent = user.role;
+    }
+
+    // Global tactile micro-interactions on button touch
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('mousedown', () => {
+        btn.classList.add('scale-[0.97]');
+      });
+      btn.addEventListener('mouseup', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+    });
+  </script>
+</body>
+</html>

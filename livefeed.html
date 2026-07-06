@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <!-- Session Security Guard -->
+  <script>
+    if (localStorage.getItem('vigilance_logged_in') !== 'true') {
+      window.location.replace('login.html');
+    }
+  </script>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Vigilance AI - Biometric Live Feed Dashboard</title>
+  <meta name="description" content="Vigilance AI biometric monitoring and real-time attendance dashboard, powered by BuildHub.">
+  
+  <!-- Typography & Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Custom Tailwind Theme Definition -->
+  <script id="tailwind-config">
+    try {
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "#131315",
+              primary: "#ffd165",
+              "primary-container": "#ffdf9a",
+              "on-primary": "#1b1b1e",
+              "on-surface": "#e5e1e4",
+              "on-surface-variant": "#d3c5ac",
+              outline: "#9b8f79",
+              error: "#ffb4ab",
+              "surface-container-lowest": "#0e0e10",
+              "surface-container-low": "#1c1b1d",
+              "surface-container": "#201f22",
+              "surface-container-high": "#2a2a2c",
+              "surface-container-highest": "#353437",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              label: ["'Hanken Grotesk'", "sans-serif"],
+            }
+          },
+        },
+      }
+    } catch (_e) {}
+  </script>
+
+  <!-- Custom Styles for Effects & Animations -->
+  <style>
+    /* Subtle Grid Overlay */
+    .grid-overlay {
+      background-image: 
+        linear-gradient(rgba(255, 209, 101, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 209, 101, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: center;
+    }
+    
+    /* Yellow Gradient Glows */
+    .yellow-gradient {
+      background: 
+        radial-gradient(circle at 80% 20%, rgba(255, 209, 101, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 10% 80%, rgba(255, 209, 101, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 209, 101, 0.02) 0%, transparent 70%);
+    }
+
+    /* Glassmorphism Panels */
+    .glass-panel {
+      background: rgba(20, 20, 22, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    /* Glowing Yellow Border/Shadow Effect */
+    .glow-yellow {
+      box-shadow: 0 0 45px -10px rgba(255, 209, 101, 0.15);
+      border: 1px solid rgba(255, 209, 101, 0.15);
+    }
+
+    /* Face Bounding Box Scanner UI styling */
+    .bounding-box {
+      border: 1px solid rgba(255, 209, 101, 0.4);
+      box-shadow: 0 0 12px rgba(255, 209, 101, 0.2);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Biometric camera corner styling */
+    .bounding-box::before, .bounding-box::after,
+    .bounding-box > .corner-bottom-left, .bounding-box > .corner-bottom-right {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: #ffd165;
+      border-style: solid;
+      pointer-events: none;
+    }
+    
+    /* Top-left corner */
+    .bounding-box::before {
+      top: -2px;
+      left: -2px;
+      border-width: 2.5px 0 0 2.5px;
+    }
+    /* Top-right corner */
+    .bounding-box::after {
+      top: -2px;
+      right: -2px;
+      border-width: 2.5px 2.5px 0 0;
+    }
+    /* Bottom-left corner */
+    .bounding-box > .corner-bottom-left {
+      bottom: -2px;
+      left: -2px;
+      border-width: 0 0 2.5px 2.5px;
+    }
+    /* Bottom-right corner */
+    .bounding-box > .corner-bottom-right {
+      bottom: -2px;
+      right: -2px;
+      border-width: 0 2.5px 2.5px 0;
+    }
+
+    /* Biometric scanner animation */
+    @keyframes scan {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .biometric-scanner {
+      animation: scan 6s linear infinite;
+    }
+
+    /* Continuously sweep down the video container */
+    @keyframes scanner-bar {
+      0% { top: 0%; opacity: 0.1; }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% { top: 100%; opacity: 0; }
+    }
+    .scanner-sweep {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffd165, transparent);
+      box-shadow: 0 0 10px #ffd165, 0 0 20px #ffd165;
+      animation: scanner-bar 5s linear infinite;
+      pointer-events: none;
+    }
+
+    /* Hide default scrollbars */
+    .scroll-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scroll-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    /* Pulsing badge animation */
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; box-shadow: 0 0 8px rgba(255, 209, 101, 0.4); }
+      50% { opacity: 1; box-shadow: 0 0 18px rgba(255, 209, 101, 0.8); }
+    }
+    .pulse-badge {
+      animation: pulse-glow 2.5s infinite;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-sans overflow-hidden h-screen flex flex-col relative select-none">
+
+  <!-- Grid & Ambient Glow Overlays -->
+  <div class="fixed inset-0 grid-overlay pointer-events-none z-0"></div>
+  <div class="fixed inset-0 yellow-gradient pointer-events-none z-0"></div>
+
+  <!-- Sticky backdrop-blurred top header -->
+  <header class="bg-surface-container-lowest/40 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5 w-full">
+    <div class="flex justify-between items-center px-6 py-4 w-full">
+      
+      <!-- Brand Logotype (Clickable) -->
+      <a href="dashboard.html" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+          <span class="material-symbols-outlined text-on-primary text-xl font-bold" style="font-variation-settings: 'FILL' 1;">shield</span>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight text-on-surface flex items-center gap-1 font-label">
+          Vigilance <span class="text-primary font-black uppercase text-sm tracking-wider font-sans">AI</span>
+        </h1>
+      </a>
+
+      <!-- Navigation links -->
+      <nav class="hidden md:flex items-center gap-8 font-label">
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="dashboard.html" id="nav-dashboard">Dashboard</a>
+        <a class="text-primary font-extrabold border-b-2 border-primary pb-1 text-xs tracking-wider uppercase" href="livefeed.html" id="nav-livefeed">Live Feed</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="analytics.html" id="nav-analytics">Analytics</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold text-xs tracking-wider uppercase" href="settings.html" id="nav-settings">Settings</a>
+      </nav>
+
+      <!-- User controls -->
+      <div class="flex items-center gap-4 pl-6 border-l border-white/10 font-label relative">
+        <div class="text-right hidden sm:block">
+          <p id="header-user-name" class="text-xs font-black text-on-surface">Admin User</p>
+          <p id="header-user-role" class="text-[9px] text-primary/70 font-bold uppercase tracking-widest">System Admin</p>
+        </div>
+        <div onclick="toggleProfileDropdown()" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center border border-white/10 cursor-pointer hover:border-primary/45 transition-colors">
+          <span class="material-symbols-outlined text-primary text-lg">person</span>
+        </div>
+        
+        <!-- Profile Dropdown Menu -->
+        <div id="profile-dropdown" class="absolute right-0 top-12 w-56 glass-panel border border-white/10 rounded-2xl p-4 shadow-xl z-50 flex flex-col gap-3 font-label hidden">
+          <div class="border-b border-white/5 pb-2">
+            <p id="dropdown-user-name" class="text-xs font-black text-on-surface">Admin User</p>
+            <p id="dropdown-user-email" class="text-[9px] text-outline mt-0.5">admin@vigilance.ai</p>
+            <p id="dropdown-user-role" class="text-[8px] text-primary font-black uppercase tracking-wider mt-1">System Admin</p>
+          </div>
+          <button type="button" onclick="handleLogout()" class="w-full py-2 bg-error/10 hover:bg-error/20 text-error border border-error/20 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
+            <span class="material-symbols-outlined text-sm">logout</span>
+            Sign Out Session
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Core Page Body (Main Area) -->
+  <div class="flex flex-1 overflow-hidden relative z-10 w-full">
+    
+    <!-- Left Sidebar: Vigilance System -->
+    <aside class="hidden md:flex flex-col h-full w-60 bg-surface-container-lowest/30 backdrop-blur-2xl border-r border-white/5 font-label">
+      <div class="flex flex-col h-full justify-between py-6">
+        
+        <div class="space-y-8">
+          <!-- Top Info Badge -->
+          <div class="px-6 flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-xl">analytics</span>
+            </div>
+            <div>
+              <h2 class="font-extrabold text-on-surface uppercase tracking-widest text-[9px]">Vigilance System</h2>
+              <p class="text-[10px] text-primary font-black uppercase tracking-wider">Online • Monitoring</p>
+            </div>
+          </div>
+
+          <!-- Nav Menu -->
+          <nav class="space-y-1.5 px-3">
+            <a href="dashboard.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">dashboard</span>
+              <span>Dashboard Overview</span>
+            </a>
+
+            <a href="registration.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg" data-original-icon="person_add">person_add</span>
+              <span>Registration</span>
+            </a>
+            
+            <a href="livefeed.html" class="bg-primary text-on-primary flex items-center gap-3.5 px-4 py-3 rounded-xl border border-primary/15 transition-all text-xs font-black uppercase tracking-wider shadow-lg shadow-primary/5">
+              <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;" data-original-icon="center_focus_strong">center_focus_strong</span>
+              <span>Live Feed</span>
+            </a>
+
+            <a href="analytics.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">analytics</span>
+              <span>Analytics Insights</span>
+            </a>
+
+            <a href="export.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">description</span>
+              <span>Export Telemetry</span>
+            </a>
+            
+            <a href="settings.html" class="text-on-surface-variant hover:text-on-surface flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-lg">settings</span>
+              <span>System Settings</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Sidebar footer / System stats -->
+        <div class="px-6 space-y-5">
+          <div class="bg-surface-container-high/40 p-4 rounded-2xl border border-white/5 backdrop-blur-md">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[9px] uppercase font-bold text-outline tracking-wider">Neural Load</span>
+              <span class="text-[9px] text-primary font-black uppercase tracking-wider">Optimal</span>
+            </div>
+            <div class="h-1.5 bg-surface-container-lowest rounded-full overflow-hidden">
+              <div class="h-full bg-primary w-[42%] shadow-[0_0_8px_rgba(255,209,101,0.4)]"></div>
+            </div>
+          </div>
+          <p class="text-[9px] text-outline font-black tracking-widest text-center opacity-40 uppercase">
+            v2.4.0 BuildHub Engine
+          </p>
+        </div>
+        
+      </div>
+    </aside>
+
+    <!-- Main View: Surveillance Feed -->
+    <main class="flex-1 flex flex-col p-6 overflow-hidden relative">
+      <div class="flex flex-col lg:flex-row gap-6 h-full overflow-hidden">
+        
+        <!-- Camera Stream Container -->
+        <div id="feed-container" class="flex-[3] relative rounded-[2rem] overflow-hidden glass-panel border border-white/10 glow-yellow transition-all duration-300">
+          
+          <!-- Continuous Horizontal Laser Scanner -->
+          <div class="scanner-sweep z-20"></div>
+
+          <!-- Video Stream Overlay & Static FX -->
+          <div class="absolute inset-0 z-0">
+            <div id="live-feed-image" class="w-full h-full bg-cover bg-center transition-all duration-700" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuChkDd7otB1SaN3jtt4dZuuGaQ7FwEi1JTdLKcWnkt5h94AIS-Auu1oU2Z5j5y1JX2pjZJo0p4i12h79BO6MJjXn7h434bGjCpQz8uwUPWw0qsXQI6XKU00i75qbeGWIgV0QamCUHnGizlb2qjqPzg_p9DknUUtI3WBOzJoJZ7imC2zoKam9covAV2hozMjSnsGDNMzSy5XCuo93gL_VTE7HGejL2Ep0rogSWgEK48O45hxNuRC8f2ciVV-6zfr0UkmCHinTzf5aXg')"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none"></div>
+          </div>
+
+          <!-- Custom Screen for Disabled State -->
+          <div id="camera-disabled-screen" class="absolute inset-0 bg-background/95 z-5 flex flex-col items-center justify-center hidden">
+            <div class="absolute inset-0 grid-overlay opacity-30"></div>
+            <span class="material-symbols-outlined text-primary text-5xl mb-3 animate-pulse" style="font-variation-settings: 'FILL' 1;">shield</span>
+            <h4 class="text-on-surface font-extrabold font-label uppercase tracking-widest text-sm">Camera Link Suspended</h4>
+            <p class="text-outline text-[10px] mt-1 font-label">Feed secure and shielded by Admin controls</p>
+          </div>
+
+          <!-- Camera Stream HUD Overlays -->
+          <div class="absolute inset-0 z-10 p-6 flex flex-col justify-between pointer-events-none">
+            
+            <!-- HUD: Top Row Status Badges -->
+            <div class="flex justify-between items-start w-full">
+              <div class="flex flex-col gap-2.5 font-label">
+                
+                <!-- Pulsing active indicator -->
+                <div id="live-badge" class="bg-black/75 backdrop-blur-xl px-4 py-2 rounded-full border border-primary/25 flex items-center gap-2.5 pointer-events-auto transition-all duration-300">
+                  <span id="live-badge-dot" class="w-2 h-2 rounded-full bg-primary pulse-badge"></span>
+                  <span id="live-badge-text" class="text-primary font-black text-[9px] uppercase tracking-widest">Live Feed Active</span>
+                </div>
+                
+                <!-- Engine specifications tag -->
+                <div class="bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/5 flex items-center gap-2 w-max">
+                  <span class="material-symbols-outlined text-primary text-xs">precision_manufacturing</span>
+                  <span id="ai-model-spec-text" class="text-on-surface/90 text-[8px] font-black tracking-wider uppercase">Engine: BuildHub v3.2</span>
+                </div>
+              </div>
+
+              <!-- Biometric widget overlay -->
+              <div id="biometric-widget" class="bg-black/75 backdrop-blur-xl px-4 py-3 rounded-2xl border border-white/15 flex items-center gap-3.5 pointer-events-auto font-label transition-all duration-300">
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                  <div class="absolute inset-0 border-2 border-primary/10 rounded-full"></div>
+                  <div class="absolute inset-0 border-2 border-t-primary rounded-full biometric-scanner shadow-[0_0_12px_rgba(255,209,101,0.2)]"></div>
+                  <span class="material-symbols-outlined text-primary text-xl">face</span>
+                </div>
+                <div>
+                  <p class="text-[8px] text-outline font-black uppercase tracking-widest">Recognition</p>
+                  <p id="biometric-accuracy-display" class="text-primary text-base font-black tracking-tighter">98.4%</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- HUD: Bounding Boxes Tracking Faces -->
+            <div class="absolute inset-0 pointer-events-none">
+              <!-- John Doe -->
+              <div id="bounding-john" class="absolute top-[26%] left-[37%] w-28 h-36 bounding-box rounded-lg flex flex-col justify-end p-2 transition-all">
+                <div class="corner-bottom-left"></div>
+                <div class="corner-bottom-right"></div>
+                <div class="bg-black/80 backdrop-blur-md border border-primary/30 px-2 py-1.5 rounded-lg text-[9px] text-white pointer-events-auto w-max font-label">
+                  <div class="font-bold text-primary font-sans">John Doe</div>
+                  <div class="opacity-80">98% Match</div>
+                </div>
+              </div>
+              
+              <!-- Sarah Chen -->
+              <div id="bounding-sarah" class="absolute top-[32%] left-[47%] w-24 h-32 bounding-box rounded-lg flex flex-col justify-end p-2 transition-all opacity-80">
+                <div class="corner-bottom-left"></div>
+                <div class="corner-bottom-right"></div>
+                <div class="bg-black/80 backdrop-blur-md border border-primary/30 px-2 py-1.5 rounded-lg text-[9px] text-white pointer-events-auto w-max font-label">
+                  <div class="font-bold text-primary font-sans">Sarah Chen</div>
+                  <div class="opacity-80">96% Match</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- HUD: Central reticle graphic layer -->
+            <div class="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
+              <div class="w-[60%] h-[60%] border border-primary rounded-full border-dashed"></div>
+              <div class="absolute w-[1px] h-36 bg-primary top-1/2 -translate-y-1/2"></div>
+              <div class="absolute w-36 h-[1px] bg-primary left-1/2 -translate-x-1/2"></div>
+            </div>
+
+            <!-- HUD: Bottom Control Row & Attendance Stats -->
+            <div class="flex justify-between items-end w-full mt-auto">
+              
+              <!-- Interaction buttons -->
+              <div class="flex gap-2.5 font-label pointer-events-auto">
+                <button id="disable-btn" class="bg-black/75 backdrop-blur-xl hover:bg-primary/20 px-4 py-2.5 rounded-xl border border-white/10 text-on-surface transition-all flex items-center gap-2 group">
+                  <span id="disable-btn-icon" class="material-symbols-outlined text-base group-hover:text-primary">videocam_off</span>
+                  <span id="disable-btn-text" class="text-[9px] font-black uppercase tracking-wider">Disable</span>
+                </button>
+                <button id="full-btn" class="bg-black/75 backdrop-blur-xl hover:bg-primary/20 px-4 py-2.5 rounded-xl border border-white/10 text-on-surface transition-all flex items-center gap-2 group">
+                  <span class="material-symbols-outlined text-base group-hover:text-primary">fullscreen</span>
+                  <span id="full-btn-text" class="text-[9px] font-black uppercase tracking-wider">Full</span>
+                </button>
+              </div>
+
+              <!-- Compact statistics panel -->
+              <div class="bg-black/75 backdrop-blur-xl px-5 py-3 rounded-[1.25rem] border border-white/10 flex items-center gap-6 pointer-events-auto font-label">
+                <div class="flex flex-col items-center">
+                  <span class="text-primary text-base font-black" id="stat-present">24</span>
+                  <span class="text-[8px] font-black uppercase text-outline tracking-wider">Present</span>
+                </div>
+                <div class="w-[1px] h-6 bg-white/10"></div>
+                <div class="flex flex-col items-center">
+                  <span class="text-on-surface text-base font-black" id="stat-late">02</span>
+                  <span class="text-[8px] font-black uppercase text-outline tracking-wider">Late</span>
+                </div>
+                <div class="w-[1px] h-6 bg-white/10"></div>
+                <div class="flex flex-col items-center">
+                  <span class="text-error text-base font-black" id="stat-absent">03</span>
+                  <span class="text-[8px] font-black uppercase text-outline tracking-wider">Absent</span>
+                </div>
+              </div>
+              
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right Sidebar: Live Recognition Logger -->
+        <div class="flex-1 min-w-[340px] flex flex-col h-full glass-panel rounded-[2rem] overflow-hidden border border-white/10 font-label">
+          
+          <!-- Sidebar Header -->
+          <div class="p-6 border-b border-white/5 flex items-center justify-between">
+            <h3 class="text-base font-bold text-on-surface">Recognition <span class="text-primary font-black uppercase text-xs">Log</span></h3>
+            <span class="bg-primary/10 text-primary text-[8px] px-2.5 py-1 rounded-full border border-primary/25 font-black uppercase tracking-widest pulse-badge">Live</span>
+          </div>
+
+          <!-- Dynamic, Animated Feed Container -->
+          <div class="flex-1 overflow-y-auto scroll-hide p-4 space-y-2.5" id="attendance-feed">
+            <!-- Initial content will be generated dynamically by JavaScript -->
+          </div>
+
+          <!-- Export Action Section -->
+          <div class="p-6 bg-surface-container-high/20 border-t border-white/5">
+            <a href="export.html" class="w-full py-3.5 bg-primary text-on-primary font-black uppercase tracking-wider text-[10px] rounded-xl hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/5 active:scale-[0.98]">
+              <span class="material-symbols-outlined text-base">description</span>
+              Export Analytics
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="bg-surface-container-lowest/60 backdrop-blur-xl w-full border-t border-white/5 relative z-50 font-label">
+    <div class="flex flex-col md:flex-row justify-between items-center px-6 py-4 gap-3 w-full">
+      <div class="flex items-center gap-2">
+        <span class="text-[9px] font-extrabold text-outline uppercase tracking-wider">
+          © 2024 Vigilance AI Ecosystem. BuildHub Powered.
+        </span>
+      </div>
+      <div class="flex gap-6 items-center">
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors uppercase tracking-wider" href="#">Docs</a>
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors uppercase tracking-wider" href="#">Privacy</a>
+        <a class="text-[9px] font-extrabold text-outline hover:text-primary transition-colors flex items-center gap-2 uppercase tracking-wider" href="#">
+          <span id="footer-status-dot" class="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)]"></span>
+          Status: <span id="footer-status-text">Operational</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script for Real-Time Event Simulation & System Micro-interactions -->
+  <script>
+    // Pool of recognized users mapping directly to verified google-hosted avatars
+    const userPool = [
+      { 
+        name: "Alex Rivera", 
+        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuAfSa-m3fNJYyxvU_tw-WwO2S_85jpknq4qkRLPwFfAQTQzfGW6OwHbJOjO3jEd3HTKMoy7X2hmQP_jqr3TW0VXQY1mUIFsVQn86AYmWd7ZbvHOK5ntvL8OAi7ApxphoaPYAGgvpqQVc5hyOvRzKe9tx34luvlBWC6bxpRpHD28wvnMEgZrofeM3BpHt1LTEovWC2UJRLOs0ipYWp7_LHXTpL6kIDC8aoqR0IWcNsUNlrHBzkxtWyvB7JnQsPwcma7BMv_izxkFPIM" 
+      },
+      { 
+        name: "Sofia Zhang", 
+        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDRTKqbtnmUktJAcMfDP6Sey3gqLWvPMWBHybBfoPYM8YW4rrsUh3HtiGk1TbbqBlzfJL3kxwMuNUx0lSONQVlMlSfUFXzge4sXsVwsrPbAe3pGvLFXKoPUoQPPKKRX4ETnGgGVzP76SLWHICVcRM_IS636vYGDlp728CJM0Z9e_a3LfZdhTHxbyyD639-QKbJ8BUQzkIIsZJKh9_xbYGlOud8FXR-_uk4WB6qj-AJsa_I5XgV6z3o1ZhTXpqWZ9Je593QkFTHHLOY" 
+      },
+      { 
+        name: "Marcus Thorne", 
+        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCIFpvM4sp7QpnjNwJ4tSTe2_j1YJyB-fVgjE4BGgoNxFF87UnwXwMCNJWcy3f3xKjFtTx2fH2uJ-JJiCG5Kz3pGdENt5BlojJzgcfGYlWnCY3opqJOG_-y-XEXfpCqMzpRlnES5iE9hmn9A1AJbh_soXNzSRMGx4BdroaTKX_5DxEhuVuBNlYHB6XiWwnJS6BEfQvS6C-VMwdUtXRJlEwd9rYLIyehbMYgbjSdYRgqu1fc3qogQ7xjLsLZpw1rPfwtY_U7QqryeDY" 
+      },
+      { 
+        name: "Elena Rossi", 
+        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuB-g9oGqzSHRFX_tkKaS4ouknpIp0zIE3Pk-6_7_ZI0nehHWdx3-CIeaEv9yLbfkdyJBuCLMDat0RrPOzUR7J1lOk3kVZg1iYh0yTAheWHv5QDGo2BdOfdHoQ7Bkohi-I5w56AP5CCeXAP82IlM-DXKvYBdSPQ3gdlYg7k0lg67cnWmpRruWMek0djKTcF4_NLlZlk_KDlzxkif7JaXgjIYaGgd70NNHXB04B9isCil-aT2xX2eYATyjRwsYcP3ALGRGWeXoM7uopM" 
+      }
+    ];
+
+    const feedContainer = document.getElementById('attendance-feed');
+    const presentStat = document.getElementById('stat-present');
+    let presentCount = 24;
+
+    // Helper to generate a random match margin (90% to 99%)
+    function getRandomMatchRate() {
+      return Math.floor(Math.random() * 10) + 90;
+    }
+
+    // Helper to format timestamps to local clock
+    function getFormattedTime() {
+      const now = new Date();
+      return now.toTimeString().split(' ')[0];
+    }
+
+    // Populate log with standard starting list
+    function initializeFeed() {
+      userPool.forEach((user, idx) => {
+        // Build mock time starting a bit in the past
+        const mockMin = 44 - idx * 2;
+        const timeStr = `08:${mockMin < 10 ? '0' + mockMin : mockMin}:15`;
+        const matchPercent = getRandomMatchRate() + '%';
+        const isActive = idx === 1; // Sofia Zhang active initially
+
+        addLogItem(user.name, user.avatar, timeStr, matchPercent, isActive, false);
+      });
+    }
+
+    // Render a row item inside log feed
+    function addLogItem(name, avatar, time, rate, active = false, prepend = false) {
+      const row = document.createElement('div');
+      row.className = `flex items-center gap-3.5 p-3 rounded-2xl border transition-all duration-500 transform translate-y-0 opacity-100 ${
+        active 
+          ? 'bg-primary/10 border-primary/25 shadow-[0_0_15px_rgba(255,209,101,0.06)]' 
+          : 'bg-transparent border-transparent hover:bg-white/5 opacity-80'
+      }`;
+
+      row.innerHTML = `
+        <div class="relative">
+          <div class="w-11 h-11 rounded-xl overflow-hidden border ${active ? 'border-primary/30' : 'border-white/10'}">
+            <img class="w-full h-full object-cover ${active ? '' : 'grayscale'} transition-all duration-500" src="${avatar}" alt="${name}">
+          </div>
+          <div class="absolute -bottom-1 -right-1 w-4.5 h-4.5 bg-primary rounded-full border border-background flex items-center justify-center shadow-lg shadow-primary/20">
+            <span class="material-symbols-outlined text-[8px] text-on-primary font-black">check</span>
+          </div>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs font-bold ${active ? 'text-primary font-sans' : 'text-on-surface font-sans'} transition-colors">${name}</p>
+          <p class="text-[9px] text-outline font-medium tracking-wider">Matched ${time}</p>
+        </div>
+        <div class="text-right font-label">
+          <span class="text-xs font-extrabold text-primary">${rate}</span>
+        </div>
+      `;
+
+      if (prepend) {
+        feedContainer.prepend(row);
+      } else {
+        feedContainer.appendChild(row);
+      }
+      
+      // Limit capacity inside feed viewport to prevent vertical overflow
+      const items = feedContainer.children;
+      if (items.length > 5) {
+        const lastItem = items[items.length - 1];
+        lastItem.classList.remove('opacity-80', 'opacity-100');
+        lastItem.classList.add('opacity-0', '-translate-y-4');
+        setTimeout(() => {
+          if (lastItem.parentNode) {
+            feedContainer.removeChild(lastItem);
+          }
+        }, 500);
+      }
+    }
+
+    // Trigger a live simulated detection update
+    function triggerSimulatedDetection() {
+      // Don't log matches if camera feed is disabled
+      if (cameraDisabled) return;
+
+      const randomUser = userPool[Math.floor(Math.random() * userPool.length)];
+      const matchRate = getRandomMatchRate() + '%';
+      const timeStr = getFormattedTime();
+
+      // De-active previous logs
+      Array.from(feedContainer.children).forEach(el => {
+        el.className = 'flex items-center gap-3.5 p-3 rounded-2xl border border-transparent bg-transparent hover:bg-white/5 opacity-80 transition-all duration-500';
+        const img = el.querySelector('img');
+        if (img) img.classList.add('grayscale');
+        const nameText = el.querySelector('p.text-xs');
+        if (nameText) nameText.className = 'text-xs font-bold text-on-surface font-sans transition-colors';
+        const avatarWrapper = el.querySelector('div.w-11');
+        if (avatarWrapper) avatarWrapper.className = 'w-11 h-11 rounded-xl overflow-hidden border border-white/10';
+      });
+
+      // Add fresh active row at top
+      addLogItem(randomUser.name, randomUser.avatar, timeStr, matchRate, true, true);
+
+      // Increment Attendance Count
+      presentCount++;
+      presentStat.textContent = presentCount < 10 ? '0' + presentCount : presentCount;
+
+      // Pulse the biometric widget bounding box matching the character detected
+      const boxToHighlight = Math.random() > 0.5 ? document.getElementById('bounding-john') : document.getElementById('bounding-sarah');
+      if (boxToHighlight) {
+        const originalBorder = boxToHighlight.style.borderColor;
+        boxToHighlight.style.borderColor = '#ffd165';
+        boxToHighlight.style.transform = 'scale(1.04)';
+        boxToHighlight.style.boxShadow = '0 0 25px rgba(255, 209, 101, 0.4)';
+        
+        setTimeout(() => {
+          boxToHighlight.style.borderColor = originalBorder;
+          boxToHighlight.style.transform = 'scale(1)';
+          boxToHighlight.style.boxShadow = '0 0 12px rgba(255, 209, 101, 0.2)';
+        }, 1500);
+      }
+    }
+
+    // Camera disable button toggle functionality
+    let cameraDisabled = false;
+    const disableBtn = document.getElementById('disable-btn');
+    const disableBtnText = document.getElementById('disable-btn-text');
+    const disableBtnIcon = document.getElementById('disable-btn-icon');
+    const disabledScreen = document.getElementById('camera-disabled-screen');
+    const faceBoundingBoxes = document.querySelectorAll('.bounding-box');
+    
+    // Additional HUD elements to control
+    const liveBadge = document.getElementById('live-badge');
+    const liveBadgeDot = document.getElementById('live-badge-dot');
+    const liveBadgeText = document.getElementById('live-badge-text');
+    const biometricWidget = document.getElementById('biometric-widget');
+
+    disableBtn.addEventListener('click', () => {
+      cameraDisabled = !cameraDisabled;
+      if (cameraDisabled) {
+        disabledScreen.classList.remove('hidden');
+        disableBtnText.textContent = "Enable";
+        disableBtnIcon.textContent = "videocam";
+        disableBtn.classList.add('bg-primary/20', 'border-primary/40');
+        faceBoundingBoxes.forEach(box => box.classList.add('hidden'));
+        
+        // Deactivate Live Badge UI
+        liveBadge.classList.remove('border-primary/25');
+        liveBadge.classList.add('border-white/5');
+        liveBadgeDot.classList.remove('bg-primary', 'pulse-badge');
+        liveBadgeDot.classList.add('bg-outline');
+        liveBadgeText.classList.remove('text-primary');
+        liveBadgeText.classList.add('text-outline');
+        liveBadgeText.textContent = "Feed Offline";
+        
+        // Hide biometric scanner
+        biometricWidget.classList.add('opacity-0', 'pointer-events-none');
+      } else {
+        disabledScreen.classList.add('hidden');
+        disableBtnText.textContent = "Disable";
+        disableBtnIcon.textContent = "videocam_off";
+        disableBtn.classList.remove('bg-primary/20', 'border-primary/40');
+        faceBoundingBoxes.forEach(box => box.classList.remove('hidden'));
+        
+        // Reactivate Live Badge UI
+        liveBadge.classList.add('border-primary/25');
+        liveBadge.classList.remove('border-white/5');
+        liveBadgeDot.classList.add('bg-primary', 'pulse-badge');
+        liveBadgeDot.classList.remove('bg-outline');
+        liveBadgeText.classList.add('text-primary');
+        liveBadgeText.classList.remove('text-outline');
+        liveBadgeText.textContent = "Live Feed Active";
+        
+        // Show biometric scanner
+        biometricWidget.classList.remove('opacity-0', 'pointer-events-none');
+      }
+    });
+
+    // Custom non-intrusive Fullscreen zoom toggle
+    const mainFeed = document.getElementById('feed-container');
+    const fullBtn = document.getElementById('full-btn');
+    const fullBtnText = document.getElementById('full-btn-text');
+
+    fullBtn.addEventListener('click', () => {
+      const isFull = mainFeed.classList.contains('fixed');
+      if (isFull) {
+        mainFeed.classList.remove('fixed', 'inset-6', 'z-50', 'bg-background/90');
+        fullBtnText.textContent = "Full";
+        fullBtn.classList.remove('bg-primary/20', 'border-primary/40');
+      } else {
+        mainFeed.classList.add('fixed', 'inset-6', 'z-50', 'bg-background/90');
+        fullBtnText.textContent = "Exit";
+        fullBtn.classList.add('bg-primary/20', 'border-primary/40');
+      }
+    });
+
+    // Load LocalStorage Configurations
+    function loadConfigSettings() {
+      // 1. Footer status
+      const status = localStorage.getItem('vigilance_system_status') || 'Operational';
+      const textEl = document.getElementById('footer-status-text');
+      const dotEl = document.getElementById('footer-status-dot');
+      if (textEl && dotEl) {
+        textEl.textContent = status;
+        if (status === 'Operational') {
+          dotEl.className = "w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)]";
+        } else if (status === 'Maintenance Mode') {
+          dotEl.className = "w-1.5 h-1.5 bg-outline rounded-full shadow-[0_0_6px_rgba(155,143,121,0.8)]";
+        } else if (status === 'Shielded Lockdown') {
+          dotEl.className = "w-1.5 h-1.5 bg-error rounded-full shadow-[0_0_6px_rgba(255,180,171,0.8)] animate-pulse";
+        } else if (status === 'Simulation Active') {
+          dotEl.className = "w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_6px_rgba(255,209,101,0.8)] animate-ping";
+        }
+      }
+
+      // 2. Active neural model spec text
+      const model = localStorage.getItem('vigilance_ai_model') || 'BuildHub Neural v3.2';
+      const specEl = document.getElementById('ai-model-spec-text');
+      if (specEl) {
+        specEl.textContent = `Engine: ${model}`;
+      }
+
+      // 3. Accuracy matching percentage
+      const threshold = localStorage.getItem('vigilance_confidence_threshold') || '98.4';
+      const accDisplay = document.getElementById('biometric-accuracy-display');
+      if (accDisplay) {
+        accDisplay.textContent = `${parseFloat(threshold).toFixed(1)}%`;
+      }
+    }
+
+    // Setup initial data and tick scheduling
+    initializeFeed();
+    loadConfigSettings();
+    loadUserDetails();
+
+    // Get loop interval from local storage
+    const customRateSec = parseFloat(localStorage.getItem('vigilance_scan_interval') || '6.0');
+    setInterval(triggerSimulatedDetection, customRateSec * 1000);
+
+    // Toggle Profile Dropdown
+    function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profile-dropdown');
+      if (dropdown) dropdown.classList.toggle('hidden');
+    }
+
+    // Close dropdown on click outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('profile-dropdown');
+      const avatarBtn = dropdown ? dropdown.previousElementSibling : null;
+      if (dropdown && avatarBtn && !dropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // Handle logout action
+    function handleLogout() {
+      localStorage.removeItem('vigilance_logged_in');
+      localStorage.removeItem('vigilance_current_user');
+      window.location.replace('login.html');
+    }
+
+    // Dynamic user details load
+    function loadUserDetails() {
+      const user = JSON.parse(localStorage.getItem('vigilance_current_user') || '{"name":"Admin User","role":"System Admin","email":"admin@vigilance.ai"}');
+      
+      const headerName = document.getElementById('header-user-name');
+      const headerRole = document.getElementById('header-user-role');
+      const dropdownName = document.getElementById('dropdown-user-name');
+      const dropdownEmail = document.getElementById('dropdown-user-email');
+      const dropdownRole = document.getElementById('dropdown-user-role');
+
+      if (headerName) headerName.textContent = user.name;
+      if (headerRole) headerRole.textContent = user.role;
+      if (dropdownName) dropdownName.textContent = user.name;
+      if (dropdownEmail) dropdownEmail.textContent = user.email;
+      if (dropdownRole) dropdownRole.textContent = user.role;
+    }
+
+    // Global tactile micro-interactions on button touch
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('mousedown', () => {
+        btn.classList.add('scale-[0.97]');
+      });
+      btn.addEventListener('mouseup', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.classList.remove('scale-[0.97]');
+      });
+    });
+  </script>
+</body>
+</html>
